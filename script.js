@@ -2,10 +2,9 @@ console.log('script.js iniciado');
 
 const API_KEY = 'AIzaSyB7mXFld0FYeZzr_0zNptLKxu2Sn3CEH2w';
 const SPREADSHEET_ID = '1XAI5jFEFeXic73aFvOXYMs70SixhKlVhEriJup2G2FA';
-const CLASSIFICATION_SPREADSHEET_ID = 'Futsal Classificação'; // Substituir pelo ID real da planilha
 
 let allDataSheet1 = []; // Dados da Sheet1 (Tabela e Placar)
-let allDataClassification = []; // Dados da planilha Futsal Classificação
+let allDataClassification = []; // Dados da aba Futsal Classificação
 let filteredDataTab2 = []; // Tabela
 let filteredDataPlacar = []; // Placar
 let isPivotTab2 = false; // Estado do Transpor para Tabela
@@ -24,7 +23,7 @@ async function fetchSheetData(sheetName, spreadsheetId = SPREADSHEET_ID) {
       if (response.status === 403) {
         throw new Error('Acesso negado (403). Verifique se a planilha está pública e se a chave API tem permissão.');
       } else if (response.status === 404) {
-        throw new Error(`Planilha ou aba ${sheetName} não encontrada (404). Verifique o ID da planilha ou a aba.`);
+        throw new Error(`Planilha ou aba ${sheetName} não encontrada (404). Verifique se a aba "${sheetName}" existe na planilha com ID ${spreadsheetId}.`);
       } else if (response.status === 429) {
         throw new Error('Limite de requisições excedido (429). Tente novamente mais tarde.');
       } else {
@@ -305,10 +304,10 @@ function displayClassification() {
   const filteredData = allDataClassification.slice(1);
   console.log('Total de linhas na Classificação:', filteredData.length);
   if (filteredData.length === 0) {
-    showError('Nenhum dado de classificação encontrado.');
+    showError('Nenhum dado de classificação encontrado na aba "Futsal Classificação". Verifique se a aba existe e contém dados.');
   }
 
-  filteredData.fororEach(row => {
+  filteredData.forEach(row => {
     const tr = document.createElement('tr');
     row.forEach(cell => {
       const td = document.createElement('td');
@@ -451,7 +450,7 @@ async function init() {
   console.log('Inicializando aplicação');
   try {
     allDataSheet1 = await fetchSheetData('Sheet1');
-    allDataClassification = await fetchSheetData('sheet1', CLASSIFICATION_SPREADSHEET_ID);
+    allDataClassification = await fetchSheetData('Futsal Classificação');
 
     if (allDataSheet1.length === 0) {
       console.error('Nenhum dado retornado da Sheet1');
@@ -459,8 +458,8 @@ async function init() {
       return;
     }
     if (allDataClassification.length === 0) {
-      console.error('Nenhum dado retornado da planilha Futsal Classificação');
-      showError('Nenhum dado disponível na planilha Futsal Classificação. Verifique a conexão, chave API ou planilha.');
+      console.error('Nenhum dado retornado da aba Futsal Classificação');
+      showError('Nenhum dado disponível na aba Futsal Classificação. Verifique se a aba existe e contém dados na planilha com ID 1XAI5jFEFeXic73aFvOXYMs70SixhKlVhEriJup2G2FA.');
       return;
     }
 
