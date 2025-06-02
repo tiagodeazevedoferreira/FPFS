@@ -1,0 +1,161 @@
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f9f9f9 !important; /* Sobrescrever Tailwind bg-gray-100 */
+}
+
+.header {
+  background-color: #1e40af;
+  color: white;
+  text-align: center;
+  padding: 1rem;
+}
+
+.tab-navigation {
+  display: flex;
+  justify-content: center;
+  background-color: #f2f2f2;
+  padding: 0.5rem;
+}
+
+.tab-button {
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.tab-button:hover {
+  background-color: #2563eb;
+}
+
+.tab-button.active-tab {
+  background-color: #1d4ed8;
+}
+
+.tab-content {
+  display: none;
+  padding: 1rem;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.footer {
+  text-align: center;
+  background-color: #1e40af;
+  color: white;
+  padding: 1rem;
+}
+
+/* Estilo da tabela */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 800px; /* Forçar rolagem horizontal em telas pequenas */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra na tabela */
+}
+
+th, td {
+  text-align: left;
+  padding: 8px;
+  border: 1px solid #e2e8f0; /* Borda mais suave */
+}
+
+tr:nth-child(even) {
+  background-color: #e6f0ea; /* Tom claro de verde */
+}
+
+th {
+  white-space: nowrap; /* Evitar quebra de texto nos cabeçalhos */
+  background-color: #f5e6e8; /* Tom claro de vermelho */
+}
+
+td {
+  max-width: 200px; /* Limitar largura das células no modo PIVOT */
+}
+
+/* Destaque visual para linhas */
+.victory-row {
+  background-color: #d4edda !important; /* Verde claro para vitórias */
+}
+
+.defeat-row {
+  background-color: #e2e8f0 !important; /* Cinza claro para derrotas */
+}
+
+.draw-row {
+  background-color: #fff3cd !important; /* Amarelo claro para empates */
+}
+
+/* Estilo para ordenação */
+th.sortable {
+  cursor: pointer;
+  position: relative;
+}
+
+th.sortable:hover {
+  text-decoration: underline;
+}
+
+th.sort-asc::after {
+  content: ' ↑';
+  font-size: 0.8rem;
+}
+
+th.sort-desc::after {
+  content: ' ↓';
+  font-size: 0.8rem;
+}
+
+/* Sombras e bordas para Big Numbers */
+.bg-white {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+}
+
+/* Sombras e bordas para botões */
+.bg-blue-500, .bg-gray-500, .bg-green-500 {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 6px !important;
+  transition: transform 0.1s ease;
+}
+
+.bg-blue-500:hover, .bg-gray-500:hover, .bg-green-500:hover {
+  transform: translateY(-1px);
+}
+
+/* Mensagem de erro */
+.bg-red-100 {
+  background-color: #f5e6e8 !important; /* Tom claro de vermelho */
+}
+
+.text-red-700 {
+  color: #d91a2a !important; /* Vermelho */
+}
+
+/* Estilo para notificações */
+.bg-yellow-100 {
+  background-color: #fef9e7 !important; /* Amarelo claro para notificações */
+}
+
+.text-yellow-700 {
+  color: #d97706 !important; /* Amarelo escuro para o texto */
+}
+
+@media (max-width: 768px) {
+  .filters {
+    font-size: 0.9rem;
+  }
+  
+  table {
+    font-size: 0.8rem;
+  }
+  
+  th, td {
+    padding: 4px;
+    max-width: 150px; /* Reduzir largura das células no PIVOT em telas pequenas */
+  }
+}
