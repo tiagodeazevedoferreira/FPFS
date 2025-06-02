@@ -3,7 +3,7 @@ name: Futsal Data Scraper
 on:
   schedule:
     - cron: '0 0 * * *'  # Roda todo dia à meia-noite (UTC)
-
+workflow_dispatch:  # Permite executar manualmente
 jobs:
   scrape:
     runs-on: ubuntu-latest
