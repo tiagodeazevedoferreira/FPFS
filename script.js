@@ -4,7 +4,7 @@ const API_KEY = 'AIzaSyB7mXFld0FYeZzr_0zNptLKxu2Sn3CEH2w';
 const SPREADSHEET_ID = '1XAI5jFEFeXic73aFvOXYMs70SixhKlVhEriJup2G2FA';
 
 let allDataSheet1 = []; // Dados da Sheet1 (Tabela e Placar)
-let allDataClassification = []; // Dados da aba Futsal Classificação
+let allDataClassification = []; // Dados da aba Classificação
 let filteredDataTab2 = []; // Tabela
 let filteredDataPlacar = []; // Placar
 let isPivotTab2 = false; // Estado do Transpor para Tabela
@@ -12,7 +12,7 @@ let sortConfigTab2 = { column: null, direction: 'asc' };
 let sortConfigPlacar = { column: null, direction: 'asc' };
 
 async function fetchSheetData(sheetName, spreadsheetId = SPREADSHEET_ID) {
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}!A1:R1000?key=${API_KEY}`;
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(sheetName)}!A1:R1000?key=${API_KEY}`;
   console.log(`Iniciando requisição à API para ${sheetName}:`, url);
   try {
     const response = await fetch(url, { mode: 'cors' });
@@ -24,6 +24,8 @@ async function fetchSheetData(sheetName, spreadsheetId = SPREADSHEET_ID) {
         throw new Error('Acesso negado (403). Verifique se a planilha está pública e se a chave API tem permissão.');
       } else if (response.status === 404) {
         throw new Error(`Planilha ou aba ${sheetName} não encontrada (404). Verifique se a aba "${sheetName}" existe na planilha com ID ${spreadsheetId}.`);
+      } else if (response.status === 400) {
+        throw new Error(`Erro de requisição (400). Verifique se o nome da aba "${sheetName}" está correto na planilha com ID ${spreadsheetId}.`);
       } else if (response.status === 429) {
         throw new Error('Limite de requisições excedido (429). Tente novamente mais tarde.');
       } else {
@@ -304,7 +306,7 @@ function displayClassification() {
   const filteredData = allDataClassification.slice(1);
   console.log('Total de linhas na Classificação:', filteredData.length);
   if (filteredData.length === 0) {
-    showError('Nenhum dado de classificação encontrado na aba "Futsal Classificação". Verifique se a aba existe e contém dados.');
+    showError('Nenhum dado de classificação encontrado na aba "Classificação". Verifique se a aba existe e contém dados na planilha com ID 1XAI5jFEFeXic73aFvOXYMs70SixhKlVhEriJup2G2FA.');
   }
 
   filteredData.forEach(row => {
@@ -450,7 +452,7 @@ async function init() {
   console.log('Inicializando aplicação');
   try {
     allDataSheet1 = await fetchSheetData('Sheet1');
-    allDataClassification = await fetchSheetData('Futsal Classificação');
+    allDataClassification = await fetchSheetData('Classificação');
 
     if (allDataSheet1.length === 0) {
       console.error('Nenhum dado retornado da Sheet1');
@@ -458,8 +460,8 @@ async function init() {
       return;
     }
     if (allDataClassification.length === 0) {
-      console.error('Nenhum dado retornado da aba Futsal Classificação');
-      showError('Nenhum dado disponível na aba Futsal Classificação. Verifique se a aba existe e contém dados na planilha com ID 1XAI5jFEFeXic73aFvOXYMs70SixhKlVhEriJup2G2FA.');
+      console.error('Nenhum dado retornado da aba Classificação');
+      showError('Nenhum dado disponível na aba Classificação. Verifique se a aba existe e contém dados na planilha com ID 1XAI5jFEFeXic73aFvOXYMs70SixhKlVhEriJup2G2FA.');
       return;
     }
 
@@ -506,7 +508,7 @@ async function init() {
 
     document.getElementById('aplicarFiltros-placar').addEventListener('click', () => {
       console.log('Aplicando filtros (Placar)');
-      displayPlacar();
+      displayPlacar);
     });
 
     document.getElementById('limparFiltros-placar').addEventListener('click', () => {
