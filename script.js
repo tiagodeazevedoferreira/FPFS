@@ -508,7 +508,7 @@ async function init() {
 
     document.getElementById('aplicarFiltros-placar').addEventListener('click', () => {
       console.log('Aplicando filtros (Placar)');
-      displayPlacar);
+      displayPlacar();
     });
 
     document.getElementById('limparFiltros-placar').addEventListener('click', () => {
