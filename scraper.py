@@ -1,7 +1,9 @@
-from selenium import webdriver
+from selenium import webbdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd
 import time
 import requests
@@ -22,12 +24,11 @@ driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), opti
 url = "https://eventos.admfutsal.com.br/evento/864"
 driver.get(url)
 
-# Esperar a página carregar (5 segundos, ajuste se necessário)
-time.sleep(5)
-
-# Extrair a tabela de classificação
+# Esperar até que a tabela esteja visível (máximo de 10 segundos)
 try:
-    table = driver.find_element(By.CSS_SELECTOR, 'table.classificacao')  # Verifique o seletor no site
+    table = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, 'table.ranking'))  # Ajuste o seletor conforme necessário
+    )
     rows = table.find_elements(By.TAG_NAME, 'tr')
 except Exception as e:
     print(f"Erro ao encontrar a tabela: {e}")
