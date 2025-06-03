@@ -6,10 +6,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd
 import time
-import requests
-import json
-from google.oauth2 import service_account
-from google.auth.transport.requests import Request
+import firebase_admin
+from firebase_admin import credentials, db
 
 # Configurar o Selenium para rodar sem interface (headless)
 options = webdriver.ChromeOptions()
@@ -97,27 +95,20 @@ finally:
     # Fechar o navegador
     driver.quit()
 
-# Carregar credenciais do arquivo credentials.json
-with open('credentials.json') as f:
-    credentials_json = json.load(f)
-
-# Configurar credenciais para obter o token de acesso
-scopes = ['https://www.googleapis.com/auth/firebase.database']
-credentials = service_account.Credentials.from_service_account_info(
-    credentials_json, scopes=scopes
-)
-
-# Obter o token de acesso
+# Inicializar o Firebase com o SDK
 try:
-    credentials.refresh(Request())
-    access_token = credentials.token
+    cred = credentials.Certificate('credentials.json')
+    firebase_admin.initialize_app(cred, {
+        'databaseURL': 'https://fpfs2025sub9-default-rtdb.firebaseio.com/'
+    })
+    print("Firebase inicializado com sucesso")
 except Exception as e:
-    print(f"Erro ao obter o token de acesso: {e}")
+    print(f"Erro ao inicializar o Firebase: {e}")
     exit(1)
 
-# URLs do Firebase Realtime Database
-classificacao_url = 'https://fpfs2025sub9-default-rtdb.firebaseio.com/classificacao'
-jogos_url = 'https://fpfs2025sub9-default-rtdb.firebaseio.com/jogos'
+# Referências aos nós do Firebase
+classificacao_ref = db.reference('classificacao')
+jogos_ref = db.reference('jogos')
 
 # Obter timestamp atual para organizar os dados
 timestamp = time.strftime('%Y%m%d_%H%M%S')
@@ -125,25 +116,17 @@ timestamp = time.strftime('%Y%m%d_%H%M%S')
 # Enviar dados de classificação para o Firebase
 for index, row in df_classificacao.iterrows():
     row_key = f"{timestamp}_{index}"
-    row_data = row.to_dict()
-    response = requests.put(
-        f"{classificacao_url}/{row_key}.json?access_token={access_token}",
-        json=row_data
-    )
-    if response.status_code != 200:
-        print(f"Erro ao gravar linha de classificação {row_key}: {response.text}")
-    else:
+    try:
+        classificacao_ref.child(row_key).set(row.to_dict())
         print(f"Linha de classificação {row_key} gravada com sucesso")
+    except Exception as e:
+        print(f"Erro ao gravar linha de classificação {row_key}: {str(e)}")
 
 # Enviar dados de jogos para o Firebase
 for index, row in df_jogos.iterrows():
     row_key = f"{timestamp}_{index}"
-    row_data = row.to_dict()
-    response = requests.put(
-        f"{jogos_url}/{row_key}.json?access_token={access_token}",
-        json=row_data
-    )
-    if response.status_code != 200:
-        print(f"Erro ao gravar linha de jogos {row_key}: {response.text}")
-    else:
+    try:
+        jogos_ref.child(row_key).set(row.to_dict())
         print(f"Linha de jogos {row_key} gravada com sucesso")
+    except Exception as e:
+        print(f"Erro ao gravar linha de jogos {row_key}: {str(e)}")
