@@ -18,7 +18,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install selenium pandas webdriver-manager requests google-auth
+        pip install selenium pandas webdriver-manager requests google-auth firebase-admin
     - name: Create credentials.json
       env:
         GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
