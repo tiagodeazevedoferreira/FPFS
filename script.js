@@ -1,31 +1,29 @@
 console.log('script.js iniciado');
 
-const API_KEY = 'AIzaSyB7mXFld0FYeZzr_0zNptLKxu2Sn3CEH2w';
-const SPREADSHEET_ID = '1XAI5jFEFeXic73aFvOXYMs70SixhKlVhEriJup2G2FA';
+// URL base do Firebase Realtime Database
+const FIREBASE_URL = 'https://fpfs2025sub9-default-rtdb.firebaseio.com/';
 
-let allDataSheet1 = []; // Dados da Sheet1 (Tabela e Placar)
-let allDataClassification = []; // Dados da aba Classificação
+let allDataSheet1 = []; // Dados do nó jogos (Tabela e Placar)
+let allDataClassification = []; // Dados do nó classificacao
 let filteredDataTab2 = []; // Tabela
 let filteredDataPlacar = []; // Placar
 let isPivotTab2 = false; // Estado do Transpor para Tabela
 let sortConfigTab2 = { column: null, direction: 'asc' };
 let sortConfigPlacar = { column: null, direction: 'asc' };
 
-async function fetchSheetData(sheetName, spreadsheetId = SPREADSHEET_ID) {
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(sheetName)}!A1:R1000?key=${API_KEY}`;
-  console.log(`Iniciando requisição à API para ${sheetName}:`, url);
+async function fetchFirebaseData(node) {
+  const url = `${FIREBASE_URL}${node}.json`;
+  console.log(`Iniciando requisição ao Firebase para ${node}:`, url);
   try {
     const response = await fetch(url, { mode: 'cors' });
-    console.log(`Resposta recebida para ${sheetName}:`, response.status, response.statusText);
+    console.log(`Resposta recebida para ${node}:`, response.status, response.statusText);
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Detalhes do erro:', errorText);
       if (response.status === 403) {
-        throw new Error('Acesso negado (403). Verifique se a planilha está pública e se a chave API tem permissão.');
+        throw new Error('Acesso negado (403). Verifique as regras do Firebase.');
       } else if (response.status === 404) {
-        throw new Error(`Planilha ou aba ${sheetName} não encontrada (404). Verifique se a aba "${sheetName}" existe na planilha com ID ${spreadsheetId}.`);
-      } else if (response.status === 400) {
-        throw new Error(`Erro de requisição (400). Verifique se o nome da aba "${sheetName}" está correto na planilha com ID ${spreadsheetId}.`);
+        throw new Error(`Nó ${node} não encontrado (404). Verifique o caminho no Firebase.`);
       } else if (response.status === 429) {
         throw new Error('Limite de requisições excedido (429). Tente novamente mais tarde.');
       } else {
@@ -33,15 +31,70 @@ async function fetchSheetData(sheetName, spreadsheetId = SPREADSHEET_ID) {
       }
     }
     const data = await response.json();
-    console.log(`Dados brutos (${sheetName}):`, data);
-    if (!data.values || data.values.length === 0) {
-      throw new Error(`Nenhum dado retornado. A aba ${sheetName} está vazia ou não existe.`);
+    console.log(`Dados brutos (${node}):`, data);
+    if (!data || Object.keys(data).length === 0) {
+      throw new Error(`Nenhum dado retornado. O nó ${node} está vazio ou não existe.`);
     }
-    console.log(`Linhas recebidas (${sheetName}):`, data.values.length);
-    return data.values;
+
+    // Converter os dados do Firebase (objeto com chaves YYYYMMDD_HHMMSS_index) para array de arrays
+    let dataArray = [];
+    if (node === 'jogos') {
+      // Cabeçalho simulado para compatibilidade
+      const headers = [
+        'Campeonato', 'Data', 'Horário', 'Ginásio', 'Mandante', 'Placar 1', 'Placar 2', 'Visitante',
+        'Local', 'Rodada', 'Dia da Semana', 'Gol', 'Assistências', 'Vitória', 'Derrota', 'Empate', 'Considerar'
+      ];
+      dataArray.push(headers);
+      // Dados
+      Object.values(data).forEach(row => {
+        const rowArray = [
+          'FPFS Sub-9 2025', // Campeonato (fixo, pois não existe no Firebase)
+          row['Data'] || '',
+          row['Horário'] || '',
+          row['Ginásio'] || '',
+          row['Mandante'] || '',
+          row['Placar 1'] || '',
+          row['Placar 2'] || '',
+          row['Visitante'] || '',
+          '', // Local (não existe no Firebase)
+          '', // Rodada (não existe no Firebase)
+          '', // Dia da Semana (pode ser calculado, mas deixaremos vazio por agora)
+          '', // Gol (não existe no Firebase)
+          '', // Assistências (não existe no Firebase)
+          row['Placar 1'] && row['Placar 2'] ? (parseInt(row['Placar 1']) > parseInt(row['Placar 2']) ? '1' : '0') : '', // Vitória (calculado com base no placar)
+          row['Placar 1'] && row['Placar 2'] ? (parseInt(row['Placar 1']) < parseInt(row['Placar 2']) ? '1' : '0') : '', // Derrota (calculado com base no placar)
+          row['Placar 1'] && row['Placar 2'] ? (parseInt(row['Placar 1']) === parseInt(row['Placar 2']) ? '1' : '0') : '', // Empate (calculado com base no placar)
+          '1' // Considerar (fixo como 1 para incluir todos os jogos)
+        ];
+        dataArray.push(rowArray);
+      });
+    } else if (node === 'classificacao') {
+      // Cabeçalho simulado
+      const headers = ['Posição', 'Time', 'Pontos', 'Jogos', 'Vitórias', 'Empates', 'Derrotas', 'Gols Pró', 'Gols Contra', 'Saldo', 'Aproveitamento'];
+      dataArray.push(headers);
+      // Dados
+      Object.values(data).forEach(row => {
+        const rowArray = [
+          row['0'] || '',  // Posição
+          row['1'] || '',  // Time
+          row['2'] || '',  // Pontos
+          row['3'] || '',  // Jogos
+          row['4'] || '',  // Vitórias
+          row['5'] || '',  // Empates
+          row['6'] || '',  // Derrotas
+          row['7'] || '',  // Gols Pró
+          row['8'] || '',  // Gols Contra
+          row['9'] || '',  // Saldo de Gols
+          row['10'] || ''  // Aproveitamento
+        ];
+        dataArray.push(rowArray);
+      });
+    }
+    console.log(`Linhas processadas (${node}):`, dataArray.length);
+    return dataArray;
   } catch (error) {
-    console.error(`Erro ao buscar dados da ${sheetName}:`, error.message);
-    showError(`Erro ao carregar dados da ${sheetName}: ${error.message}`);
+    console.error(`Erro ao buscar dados do ${node}:`, error.message);
+    showError(`Erro ao carregar dados do ${node}: ${error.message}`);
     return [];
   }
 }
@@ -231,7 +284,7 @@ function displayData(data, filteredData, tabId) {
   });
 
   if (hasInconsistency && tabId === 'tab2') {
-    showError('Inconsistência nos dados: Algumas linhas possuem mais de um resultado (Vitória, Derrota, Empate). Corrija a planilha.');
+    showError('Inconsistência nos dados: Algumas linhas possuem mais de um resultado (Vitória, Derrota, Empate).');
   }
 }
 
@@ -306,7 +359,7 @@ function displayClassification() {
   const filteredData = allDataClassification.slice(1);
   console.log('Total de linhas na Classificação:', filteredData.length);
   if (filteredData.length === 0) {
-    showError('Nenhum dado de classificação encontrado na aba "Classificação". Verifique se a aba existe e contém dados na planilha com ID 1XAI5jFEFeXic73aFvOXYMs70SixhKlVhEriJup2G2FA.');
+    showError('Nenhum dado de classificação encontrado no nó classificacao.');
   }
 
   filteredData.forEach(row => {
@@ -451,17 +504,17 @@ function showTab(tabId) {
 async function init() {
   console.log('Inicializando aplicação');
   try {
-    allDataSheet1 = await fetchSheetData('Sheet1');
-    allDataClassification = await fetchSheetData('Classificação');
+    allDataSheet1 = await fetchFirebaseData('jogos');
+    allDataClassification = await fetchFirebaseData('classificacao');
 
     if (allDataSheet1.length === 0) {
-      console.error('Nenhum dado retornado da Sheet1');
-      showError('Nenhum dado disponível na Sheet1. Verifique a conexão, chave API ou planilha.');
+      console.error('Nenhum dado retornado do nó jogos');
+      showError('Nenhum dado disponível no nó jogos. Verifique o Firebase.');
       return;
     }
     if (allDataClassification.length === 0) {
-      console.error('Nenhum dado retornado da aba Classificação');
-      showError('Nenhum dado disponível na aba Classificação. Verifique se a aba existe e contém dados na planilha com ID 1XAI5jFEFeXic73aFvOXYMs70SixhKlVhEriJup2G2FA.');
+      console.error('Nenhum dado retornado do nó classificacao');
+      showError('Nenhum dado disponível no nó classificacao. Verifique o Firebase.');
       return;
     }
 
@@ -523,4 +576,7 @@ async function init() {
   }
 }
 
-init();
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM completamente carregado');
+  init();
+});
