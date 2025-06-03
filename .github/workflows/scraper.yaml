@@ -23,9 +23,20 @@ jobs:
       env:
         GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
       run: |
-        echo "$GOOGLE_CREDENTIALS" | tr -d '\n' > credentials.json.temp
-        sed 's/\\n/\n/g' credentials.json.temp > credentials.json
+        # Verificar se o segredo está vazio
+        if [ -z "$GOOGLE_CREDENTIALS" ]; then
+          echo "Erro: GOOGLE_CREDENTIALS está vazio"
+          exit 1
+        fi
+        # Escrever o arquivo temporário
+        printf "%s" "$GOOGLE_CREDENTIALS" > credentials.json.temp
+        # Usar Python para limpar e reescrever o JSON
+        python -c "import json; creds = json.loads(open('credentials.json.temp').read()); json.dump(creds, open('credentials.json', 'w'), indent=2)"
         rm credentials.json.temp
-        cat credentials.json || echo "Erro: arquivo credentials.json vazio ou não criado"
+        # Depuração
+        echo "Tamanho do arquivo credentials.json:"
+        ls -l credentials.json
+        echo "Conteúdo do credentials.json (mascarado):"
+        head -n 5 credentials.json || echo "Erro: arquivo credentials.json vazio ou não criado"
     - name: Run scraper
       run: python scraper.py
