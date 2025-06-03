@@ -86,10 +86,27 @@ try:
     df_jogos = pd.DataFrame(formatted_jogos, columns=["Data", "Horário", "Ginásio", "Mandante", "Placar 1", "X", "Placar 2", "Visitante"])
     print(f"Dados de jogos formatados: {len(formatted_jogos)} linhas.")
 
+    # Extrair tabela de artilharia
+    url_artilharia = "https://eventos.admfutsal.com.br/evento/864/artilharia"
+    driver.get(url_artilharia)
+    time.sleep(5)  # Espera inicial
+    table_artilharia = WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, 'table'))  # Ajuste se necessário
+    )
+    rows_artilharia = table_artilharia.find_elements(By.TAG_NAME, 'tr')
+    data_artilharia = []
+    for row in rows_artilharia:
+        cols = row.find_elements(By.TAG_NAME, 'td')
+        cols = [col.text.strip() for col in cols]
+        data_artilharia.append(cols)
+    df_artilharia = pd.DataFrame(data_artilharia)
+    print(f"Dados de artilharia extraídos: {len(data_artilharia)} linhas.")
+
 except Exception as e:
     print(f"Erro ao extrair dados: {str(e)}")
     df_classificacao = pd.DataFrame()
     df_jogos = pd.DataFrame(columns=["Data", "Horário", "Ginásio", "Mandante", "Placar 1", "X", "Placar 2", "Visitante"])
+    df_artilharia = pd.DataFrame()
 
 finally:
     # Fechar o navegador
@@ -109,6 +126,7 @@ except Exception as e:
 # Referências aos nós do Firebase
 classificacao_ref = db.reference('classificacao')
 jogos_ref = db.reference('jogos')
+artilharia_ref = db.reference('artilharia')
 
 # Obter timestamp atual para organizar os dados
 timestamp = time.strftime('%Y%m%d_%H%M%S')
@@ -130,3 +148,12 @@ for index, row in df_jogos.iterrows():
         print(f"Linha de jogos {row_key} gravada com sucesso")
     except Exception as e:
         print(f"Erro ao gravar linha de jogos {row_key}: {str(e)}")
+
+# Enviar dados de artilharia para o Firebase
+for index, row in df_artilharia.iterrows():
+    row_key = f"{timestamp}_{index}"
+    try:
+        artilharia_ref.child(row_key).set(row.to_dict())
+        print(f"Linha de artilharia {row_key} gravada com sucesso")
+    except Exception as e:
+        print(f"Erro ao gravar linha de artilharia {row_key}: {str(e)}")
