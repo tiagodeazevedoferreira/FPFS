@@ -86,7 +86,11 @@ try:
 
         formatted_jogos.append([data, horario, ginasio, mandante, placar1, "X", placar2, visitante])
 
+    # Criar DataFrame com índice explícito
     df_jogos = pd.DataFrame(formatted_jogos, columns=["Data", "Horário", "Ginásio", "Mandante", "Placar 1", "X", "Placar 2", "Visitante"])
+    df_jogos['Index'] = df_jogos.index  # Adicionar o índice como uma coluna
+    # Ordenar pelo índice (ordem crescente)
+    df_jogos = df_jogos.sort_values(by='Index', ascending=True)
     print(f"Dados de jogos formatados: {len(formatted_jogos)} linhas.")
 
     # Extrair tabela de artilharia
@@ -108,7 +112,7 @@ try:
 except Exception as e:
     print(f"Erro ao extrair dados: {str(e)}")
     df_classificacao = pd.DataFrame()
-    df_jogos = pd.DataFrame(columns=["Data", "Horário", "Ginásio", "Mandante", "Placar 1", "X", "Placar 2", "Visitante"])
+    df_jogos = pd.DataFrame(columns=["Data", "Horário", "Ginásio", "Mandante", "Placar 1", "X", "Placar 2", "Visitante", "Index"])
     df_artilharia = pd.DataFrame()
 
 finally:
@@ -143,9 +147,9 @@ for index, row in df_classificacao.iterrows():
     except Exception as e:
         print(f"Erro ao gravar linha de classificação {row_key}: {str(e)}")
 
-# Enviar dados de jogos para o Firebase
+# Enviar dados de jogos para o Firebase, mantendo a ordem do índice
 for index, row in df_jogos.iterrows():
-    row_key = f"{timestamp}_{index}"
+    row_key = f"{timestamp}_{int(row['Index'])}"  # Usar o índice da coluna Index
     try:
         jogos_ref.child(row_key).set(row.to_dict())
         print(f"Linha de jogos {row_key} gravada com sucesso")
