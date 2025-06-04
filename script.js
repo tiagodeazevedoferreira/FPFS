@@ -9,15 +9,15 @@ let filteredDataPlacar = []; // Placar
 let sortConfigPlacar = { column: 18, direction: 'asc' }; // Default to Index column
 let allDataArtilharia = []; // Dados do nó artilharia
 
-// Função para normalizar strings (remove espaços, caracteres especiais e converte para minúsculas)
+// Função para normalizar strings (mantida conforme instrução)
 function normalizeString(str) {
   if (!str || typeof str !== 'string') return '';
   return str
     .trim()
     .toLowerCase()
-    .normalize('NFD') // Normaliza caracteres acentuados
-    .replace(/[\u0300-\u036f]/g, '') // Remove acentos
-    .replace(/[^a-z0-9\s]/g, ''); // Remove caracteres especiais
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]/g, '');
 }
 
 // Função para converter texto para title case
@@ -62,11 +62,11 @@ async function fetchFirebaseData(node) {
           'FPFS Sub-9 2025',
           row['Data'] || '',
           row['Horário'] || '',
-          row['Ginásio'] || '',
-          row['Mandante'] || '',
+          toTitleCase(row['Ginásio'] || ''), // Aplicar toTitleCase
+          toTitleCase(row['Mandante'] || ''), // Aplicar toTitleCase
           row['Placar 1'] || '',
           row['Placar 2'] || '',
-          row['Visitante'] || '',
+          toTitleCase(row['Visitante'] || ''), // Aplicar toTitleCase
           '', '', '', '', '',
           row['Placar 1'] && row['Placar 2'] ? (parseInt(row['Placar 1']) > parseInt(row['Placar 2']) ? '1' : '0') : '',
           row['Placar 1'] && row['Placar 2'] ? (parseInt(row['Placar 1']) < parseInt(row['Placar 2']) ? '1' : '0') : '',
@@ -82,8 +82,16 @@ async function fetchFirebaseData(node) {
       Object.entries(data).forEach(([key, row]) => {
         if (key === '0') return; // Ignora a chave 0
         const rowArray = [
-          row['1'] || '', row['2'] || '', row['3'] || '', row['4'] || '', row['5'] || '',
-          row['6'] || '', row['7'] || '', row['8'] || '', row['9'] || '', row['10'] || '',
+          row['1'] || '',
+          toTitleCase(row['2'] || ''), // Aplicar toTitleCase
+          row['3'] || '',
+          row['4'] || '',
+          row['5'] || '',
+          row['6'] || '',
+          row['7'] || '',
+          row['8'] || '',
+          row['9'] || '',
+          row['10'] || '',
           row['11'] || ''
         ];
         dataArray.push(rowArray);
@@ -166,6 +174,7 @@ function populateFiltersSheet1(data) {
     });
   });
 }
+
 function sortData(data, columnIndex, direction) {
   const sortedData = [...data];
   sortedData.sort((a, b) => {
@@ -269,7 +278,7 @@ function displayData(data, filteredData, page) {
     columnIndices.forEach(idx => {
       const td = document.createElement('td');
       const cell = row[idx];
-      td.textContent = idx === 2 ? formatTime(cell) : cell || '';
+      td.textContent = idx === 2 ? formatTime(cell) : cell || ''; // Dados já formatados
       td.className = 'p-2 border';
       tr.appendChild(td);
     });
@@ -311,7 +320,7 @@ function displayClassification() {
     const tr = document.createElement('tr');
     row.forEach(cell => {
       const td = document.createElement('td');
-      td.textContent = cell || '';
+      td.textContent = cell || ''; // Dados já formatados
       td.className = 'p-2 border';
       tr.appendChild(td);
     });
@@ -332,11 +341,6 @@ function filterDataSheet1(data, filters) {
       campeonato, dataStr, horario, ginasio, mandante, placar1, placar2, visitante,
       local, rodada, diaSemana, gol, assistencias, vitoria, derrota, empate, considerar, Index
     ] = row;
-
-    // Temporariamente remover a verificação de considerar para teste
-    // const considerarValue = considerar !== undefined && considerar !== null ? String(considerar).trim() : '1';
-    // const isValidConsiderar = considerarValue === '1';
-    // console.log(`Linha ${index + 2}: Placar1=${placar1 || 'vazio'}, Considerar=${considerarValue}, isValidConsiderar=${isValidConsiderar}`);
 
     let dataJogo = null;
     try {
@@ -361,19 +365,13 @@ function filterDataSheet1(data, filters) {
     const dataInicio = filters.dataInicio ? new Date(filters.dataInicio) : null;
     const dataFim = filters.dataFim ? new Date(filters.dataFim) : null;
 
-    const normalizedMandante = normalizeString(mandante);
-    const normalizedVisitante = normalizeString(visitante);
-    const normalizedFilterTime = normalizeString(filters.time);
-
     const result = (
-      // isValidConsiderar &&
       (!filters.campeonato || campeonato === filters.campeonato) &&
       (!dataInicio || (dataJogo && dataJogo >= dataInicio)) &&
-      (!dataFim || (dataJogo && dataJogo <= dataFim)) &&
-      (!normalizedFilterTime || normalizedMandante === normalizedFilterTime || normalizedVisitante === normalizedFilterTime)
+      (!dataFim || (dataJogo && dataJogo <= dataFim))
     );
 
-    console.log(`Linha ${index + 2}: Mandante=${mandante} (Normalizado: ${normalizedMandante}), Visitante=${visitante} (Normalizado: ${normalizedVisitante}), Filtro Time=${filters.time} (Normalizado: ${normalizedFilterTime}), Passou=${result}`);
+    console.log(`Linha ${index + 2}: Campeonato=${campeonato}, Data=${dataStr}, Passou=${result}`);
     return result;
   }).sort((a, b) => {
     const indexA = parseInt(a[17]) || 0;
@@ -403,6 +401,7 @@ function displayPlacar() {
   const sortedData = sortData(filteredDataPlacar, sortConfigPlacar.column, sortConfigPlacar.direction);
   displayData(allDataSheet1, sortedData, 'placar');
 }
+
 function displayArtilharia() {
   console.log('Exibindo dados da Artilharia:', allDataArtilharia);
   clearError();
@@ -455,6 +454,7 @@ function clearFilters(tabId) {
     displayPlacar();
   }
 }
+
 function showTab(tabId) {
   console.log(`Trocando para aba ${tabId}`);
   const tabs = document.querySelectorAll('.tab-content');
