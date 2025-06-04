@@ -55,6 +55,9 @@ try:
         if len(row) < 4:  # Garantir que haja pelo menos Data, Horário, Ginásio e a última coluna
             continue
         data = row[0] if len(row) > 0 else ""
+        # Corrigir o formato da data para DD/MM/YYYY
+        if data and len(data.split('/')) == 2:  # Se a data está no formato DD/MM
+            data = f"{data}/2025"  # Adiciona o ano 2025
         horario = row[1] if len(row) > 1 else ""
         ginasio = row[2] if len(row) > 2 else ""
         ultima_coluna = row[-1] if row else ""  # Última coluna com o jogo e placar
