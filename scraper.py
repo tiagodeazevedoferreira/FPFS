@@ -35,6 +35,12 @@ try:
     df_classificacao = pd.DataFrame(data_classificacao)
     print(f"Dados de classificação extraídos: {len(data_classificacao)} linhas.")
 
+    # Adicionar coluna Index ao df_classificacao
+    df_classificacao['Index'] = df_classificacao.index
+    # Ordenar o DataFrame por Index em ordem crescente
+    df_classificacao = df_classificacao.sort_values(by='Index', ascending=True)
+    print(f"Classificação ordenada por Index: {df_classificacao['Index'].tolist()}")
+
     # Extrair tabela de jogos
     url_jogos = "https://eventos.admfutsal.com.br/evento/864/jogos"
     driver.get(url_jogos)
@@ -145,7 +151,7 @@ timestamp = time.strftime('%Y_')
 
 # Enviar dados de classificação para o Firebase
 for index, row in df_classificacao.iterrows():
-    row_key = f"{timestamp}{index}"
+    row_key = f"{timestamp}{int(row['Index'])}"
     try:
         print(f"Tentando gravar linha de classificação {row_key}: {row.to_dict()}")
         classificacao_ref.child(row_key).set(row.to_dict())
