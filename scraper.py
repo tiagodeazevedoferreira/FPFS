@@ -39,7 +39,7 @@ try:
     url_jogos = "https://eventos.admfutsal.com.br/evento/864/jogos"
     driver.get(url_jogos)
     time.sleep(5)  # Espera inicial
-    table_jogos = WebDriverWait(driver, 20).until(
+    table_jogosDit = table_jogos.find(
         EC.presence_of_element_located((By.CSS_SELECTOR, 'table'))  # Ajuste se necessário
     )
     rows_jogos = table_jogos.find_elements(By.TAG_NAME, 'tr')
@@ -56,7 +56,7 @@ try:
             continue
         data = row[0] if len(row) > 0 else ""
         # Corrigir o formato da data para DD/MM/YYYY
-        if data and len(data.split('/')) == 2:  # Se a data está no formato DD/MM
+        if data and len(data.split('/')) == 2:  # Se a data está no formato DD/MM/
             data = f"{data}/2025"  # Adiciona o ano 2025
         horario = row[1] if len(row) > 1 else ""
         ginasio = row[2] if len(row) > 2 else ""
@@ -136,11 +136,11 @@ jogos_ref = db.reference('jogos')
 artilharia_ref = db.reference('artilharia')
 
 # Obter timestamp atual para organizar os dados
-timestamp = time.strftime('%Y%m%d_%H%M%S')
+timestamp = time.strftime('%Y_')
 
 # Enviar dados de classificação para o Firebase
 for index, row in df_classificacao.iterrows():
-    row_key = f"{timestamp}_{index}"
+    row_key = f"{timestamp}{index}"
     try:
         classificacao_ref.child(row_key).set(row.to_dict())
         print(f"Linha de classificação {row_key} gravada com sucesso")
@@ -149,7 +149,7 @@ for index, row in df_classificacao.iterrows():
 
 # Enviar dados de jogos para o Firebase, mantendo a ordem do índice
 for index, row in df_jogos.iterrows():
-    row_key = f"{timestamp}_{int(row['Index'])}"  # Usar o índice da coluna Index
+    row_key = f"{timestamp}{int(row['Index'])}"  # Usar o índice da coluna Index
     try:
         jogos_ref.child(row_key).set(row.to_dict())
         print(f"Linha de jogos {row_key} gravada com sucesso")
@@ -158,7 +158,7 @@ for index, row in df_jogos.iterrows():
 
 # Enviar dados de artilharia para o Firebase
 for index, row in df_artilharia.iterrows():
-    row_key = f"{timestamp}_{index}"
+    row_key = f"{timestamp}{index}"
     try:
         artilharia_ref.child(row_key).set(row.to_dict())
         print(f"Linha de artilharia {row_key} gravada com sucesso")
