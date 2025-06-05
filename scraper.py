@@ -39,8 +39,8 @@ try:
     url_jogos = "https://eventos.admfutsal.com.br/evento/864/jogos"
     driver.get(url_jogos)
     time.sleep(5)  # Espera inicial
-    table_jogosDit = table_jogos.find(
-        EC.presence_of_element_located((By.CSS_SELECTOR, 'table'))  # Ajuste se necessário
+    table_jogos = WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, 'table'))
     )
     rows_jogos = table_jogos.find_elements(By.TAG_NAME, 'tr')
     data_jogos = []
@@ -56,7 +56,7 @@ try:
             continue
         data = row[0] if len(row) > 0 else ""
         # Corrigir o formato da data para DD/MM/YYYY
-        if data and len(data.split('/')) == 2:  # Se a data está no formato DD/MM/
+        if data and len(data.split('/')) == 2:  # Se a data está no formato DD/MM
             data = f"{data}/2025"  # Adiciona o ano 2025
         horario = row[1] if len(row) > 1 else ""
         ginasio = row[2] if len(row) > 2 else ""
@@ -98,7 +98,7 @@ try:
     driver.get(url_artilharia)
     time.sleep(5)  # Espera inicial
     table_artilharia = WebDriverWait(driver, 20).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, 'table'))  # Ajuste se necessário
+        EC.presence_of_element_located((By.CSS_SELECTOR, 'table'))
     )
     rows_artilharia = table_artilharia.find_elements(By.TAG_NAME, 'tr')
     data_artilharia = []
@@ -118,6 +118,11 @@ except Exception as e:
 finally:
     # Fechar o navegador
     driver.quit()
+
+# Verificar se os DataFrames estão vazios
+if df_classificacao.empty and df_jogos.empty and df_artilharia.empty:
+    print("Erro: Nenhum dado foi extraído.")
+    exit(1)
 
 # Inicializar o Firebase com o SDK
 try:
@@ -142,6 +147,7 @@ timestamp = time.strftime('%Y_')
 for index, row in df_classificacao.iterrows():
     row_key = f"{timestamp}{index}"
     try:
+        print(f"Tentando gravar linha de classificação {row_key}: {row.to_dict()}")
         classificacao_ref.child(row_key).set(row.to_dict())
         print(f"Linha de classificação {row_key} gravada com sucesso")
     except Exception as e:
@@ -149,8 +155,9 @@ for index, row in df_classificacao.iterrows():
 
 # Enviar dados de jogos para o Firebase, mantendo a ordem do índice
 for index, row in df_jogos.iterrows():
-    row_key = f"{timestamp}{int(row['Index'])}"  # Usar o índice da coluna Index
+    row_key = f"{timestamp}{int(row['Index'])}"
     try:
+        print(f"Tentando gravar linha de jogos {row_key}: {row.to_dict()}")
         jogos_ref.child(row_key).set(row.to_dict())
         print(f"Linha de jogos {row_key} gravada com sucesso")
     except Exception as e:
@@ -160,6 +167,7 @@ for index, row in df_jogos.iterrows():
 for index, row in df_artilharia.iterrows():
     row_key = f"{timestamp}{index}"
     try:
+        print(f"Tentando gravar linha de artilharia {row_key}: {row.to_dict()}")
         artilharia_ref.child(row_key).set(row.to_dict())
         print(f"Linha de artilharia {row_key} gravada com sucesso")
     except Exception as e:
