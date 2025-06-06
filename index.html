@@ -50,9 +50,9 @@
   <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.json">
 </head>
-<body>
+<body class="bg-gray-100">
   <header class="header">
-    <h1>Jogos da FPFS</h1>
+    <h1 class="text-2xl font-bold">Jogos da FPFS</h1>
   </header>
 
   <nav class="tab-navigation">
@@ -66,7 +66,7 @@
     <div id="errorMessage" class="hidden bg-red-100 text-red-700 p-2 rounded mb-4"></div>
 
 
-<div id="placar" class="tab-content">
+<div id="placar" class="tab-content active">
   <div class="filters mb-4">
     <h2 class="text-lg font-semibold">Filtros</h2>
     <details class="md:open">
@@ -85,9 +85,9 @@
       </div>
     </details>
 
-
   </div>
-  <div class=""tab-content">
+  
+<div class="table-container">
     <table class="w-full">
       <thead id="tableHead-placar"></thead>
       <tbody id="placarBody"></tbody>
@@ -95,7 +95,7 @@
   </div>
 </div>
 
-  <div id="classification" class="tab-content">
+ <div id="classification" class="tab-content active">
     <div class="filters mb-4">
       <h2 class="text-lg font-semibold">Filtros</h2>
       <details class="md:open">
@@ -114,19 +114,17 @@
         </div>
       </details>
     </div>
-    <table class="w-full">
+
+  <div class="table-container">
+    <table class="table-container">
       <thead id="tableHead-classification"></thead>
       <tbody id="classificationBody"></tbody>
     </table>
   </div>
+</div>
 
 
-
-
-
-
-
-<div id="artilharia" class="tab-content">
+<div id="artilharia" class="tab-content active">
   <div class="filters mb-4">
     <h2 class="text-lg font-semibold">Filtros</h2>
     <details class="md:open">
@@ -148,11 +146,15 @@
         <button id="limparFiltros-artilharia" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Limpar Filtros</button>
       </div>
     </details>
-    <table>
+   </div>
+
+  <div class="table-container">
+	<table class="table-container">
       <thead id="tableHead-artilharia"></thead>
       <tbody id="artilhariaBody"></tbody>
     </table>
-
+ </div>
+</div>
 
 
 

@@ -1,6 +1,6 @@
 body {
   font-family: 'Roboto', sans-serif;
-  background-color: #f9f9f9 !important;
+  background-color: #f9f9f9 !important; /* Sobrescrever Tailwind bg-gray-100 */
 }
 
 .header {
@@ -37,10 +37,63 @@ body {
 .tab-content {
   display: none;
   padding: 1rem;
+  overflow-x: visible !important; /* Garante que a rolagem fique no .table-container, sobrescreve Tailwind */
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
 .tab-content.active {
   display: block;
+}
+
+.table-container {
+  overflow-x: auto; /* Habilita rolagem horizontal */
+  width: 100%; /* Limita à largura do elemento pai */
+  max-width: 100%; /* Evita ultrapassar a viewport */
+  position: relative; /* Para indicadores visuais */
+  -webkit-overflow-scrolling: touch; /* Suaviza a rolagem no iOS */
+}
+
+/* Estilizar a barra de rolagem */
+.table-container::-webkit-scrollbar {
+  height: 8px; /* Altura da barra de rolagem */
+  display: block; /* Tenta forçar visibilidade */
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f2f2f2; /* Fundo da barra */
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #3b82f6; /* Cor da barra */
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #2563eb; /* Cor ao passar o mouse */
+}
+
+.table-container {
+  scrollbar-width: auto; /* Para Firefox */
+  scrollbar-color: #3b82f6 #f2f2f2; /* Cor da barra e fundo no Firefox */
+}
+
+/* Indicador visual de rolagem (sombra à direita) */
+.table-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 100%;
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.2), transparent);
+  pointer-events: none;
+  display: none; /* Oculta por padrão */
+}
+
+.table-container:not(:hover)::after {
+  display: block; /* Mostra a sombra quando não está interagindo */
 }
 
 .footer {
@@ -50,51 +103,50 @@ body {
   padding: 1rem;
 }
 
-.table-container {
-  overflow-x: auto;
-  max-width: 100%;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-}
-
+/* Estilo da tabela */
 table {
   border-collapse: collapse;
   width: 100%;
-  min-width: 600px; /* Ajustado de 800px para melhorar responsividade */
-  background-color: #fff;
+  min-width: 800px; /* Forçar rolagem horizontal */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra na tabela */
 }
 
 th, td {
   text-align: left;
   padding: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #e2e8f0; /* Borda mais suave */
 }
-
-tr:nth-child(even) {
-  background-color: #e6f0ea;
-}
-
-th {
-  white-space: nowrap;
-  background-color: #f5e6e8;
-}
-
 td {
   max-width: 200px;
 }
 
+tr:nth-child(even) {
+  background-color: #e6f0ea; /* Tom claro de verde */
+}
+
+th {
+  white-space: nowrap; /* Evitar quebra de texto nos cabeçalhos */
+  background-color: #f5e6e8; /* Tom claro de vermelho */
+}
+
+td {
+  max-width: 200px; /* Limitar largura das células no modo PIVOT */
+}
+
+/* Destaque visual para linhas */
 .victory-row {
-  background-color: #d4edda !important;
+  background-color: #d4edda !important; /* Verde claro para vitórias */
 }
 
 .defeat-row {
-  background-color: #e2e8f0 !important;
+  background-color: #e2e8f0 !important; /* Cinza claro para derrotas */
 }
 
 .draw-row {
-  background-color: #fff3cd !important;
+  background-color: #fff3cd !important; /* Amarelo claro para empates */
 }
 
+/* Estilo para ordenação */
 th.sortable {
   cursor: pointer;
   position: relative;
@@ -114,11 +166,13 @@ th.sort-desc::after {
   font-size: 0.8rem;
 }
 
+/* Sombras e bordas para Big Numbers */
 .bg-white {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
   border-radius: 8px !important;
 }
 
+/* Sombras e bordas para botões */
 .bg-blue-500, .bg-gray-500, .bg-green-500 {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
   border-radius: 6px !important;
@@ -129,20 +183,22 @@ th.sort-desc::after {
   transform: translateY(-1px);
 }
 
+/* Mensagem de erro */
 .bg-red-100 {
-  background-color: #f5e6e8 !important;
+  background-color: #f5e6e8 !important; /* Tom claro de vermelho */
 }
 
 .text-red-700 {
-  color: #d91a2a !important;
+  color: #d91a2a !important; /* Vermelho */
 }
 
+/* Estilo para notificações */
 .bg-yellow-100 {
-  background-color: #fef9e7 !important;
+  background-color: #fef9e7 !important; /* Amarelo claro para notificações */
 }
 
 .text-yellow-700 {
-  color: #d97706 !important;
+  color: #d97706 !important; /* Amarelo escuro para o texto */
 }
 
 @media (max-width: 768px) {
@@ -151,12 +207,11 @@ th.sort-desc::after {
   }
   
   table {
-    font-size: 0.8rem;
-    min-width: 500px; /* Ajustado para telas menores */
+    font-size: 0.6rem;
   }
   
   th, td {
     padding: 4px;
-    max-width: 150px;
+    max-width: 150px; /* Reduzir largura das células no PIVOT em telas pequenas */
   }
 }
