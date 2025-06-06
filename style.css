@@ -52,48 +52,27 @@ body {
   max-width: 100%; /* Evita ultrapassar a viewport */
   position: relative; /* Para indicadores visuais */
   -webkit-overflow-scrolling: touch; /* Suaviza a rolagem no iOS */
+  scrollbar-width: thin; /* Para Firefox */
+  scrollbar-color: #3b82f6 #f2f2f2;
 }
 
 /* Estilizar a barra de rolagem */
 .table-container::-webkit-scrollbar {
-  height: 8px; /* Altura da barra de rolagem */
-  display: block; /* Tenta forçar visibilidade */
+  height: 6px;
 }
 
 .table-container::-webkit-scrollbar-track {
-  background: #f2f2f2; /* Fundo da barra */
+  background: #f2f2f2;
   border-radius: 4px;
 }
 
 .table-container::-webkit-scrollbar-thumb {
-  background: #3b82f6; /* Cor da barra */
+  background: #3b82f6;
   border-radius: 4px;
 }
 
 .table-container::-webkit-scrollbar-thumb:hover {
-  background: #2563eb; /* Cor ao passar o mouse */
-}
-
-.table-container {
-  scrollbar-width: auto; /* Para Firefox */
-  scrollbar-color: #3b82f6 #f2f2f2; /* Cor da barra e fundo no Firefox */
-}
-
-/* Indicador visual de rolagem (sombra à direita) */
-.table-container::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 10px;
-  height: 100%;
-  background: linear-gradient(to left, rgba(0, 0, 0, 0.2), transparent);
-  pointer-events: none;
-  display: none; /* Oculta por padrão */
-}
-
-.table-container:not(:hover)::after {
-  display: block; /* Mostra a sombra quando não está interagindo */
+  background: #2563eb;
 }
 
 .footer {
@@ -103,47 +82,59 @@ body {
   padding: 1rem;
 }
 
-/* Estilo da tabela */
+/* Estilo geral da tabela */
 table {
   border-collapse: collapse;
   width: 100%;
-  min-width: 800px; /* Forçar rolagem horizontal */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra na tabela */
+  min-width: 800px; /* Forçar rolagem horizontal para outras tabelas */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 th, td {
   text-align: left;
   padding: 8px;
-  border: 1px solid #e2e8f0; /* Borda mais suave */
+  border: 1px solid transparent;
+  border-bottom: 1px solid #e2e8f0;
 }
+
 td {
   max-width: 200px;
 }
 
 tr:nth-child(even) {
-  background-color: #e6f0ea; /* Tom claro de verde */
+  background-color: #e6f0ea;
 }
 
 th {
-  white-space: nowrap; /* Evitar quebra de texto nos cabeçalhos */
-  background-color: #f5e6e8; /* Tom claro de vermelho */
+  white-space: nowrap;
+  background-color: #f5e6e8;
 }
 
-td {
-  max-width: 200px; /* Limitar largura das células no modo PIVOT */
+/* Estilo específico para a tabela Artilharia */
+#artilhariaTable {
+  min-width: auto; /* Remove a largura mínima fixa */
+  width: auto; /* Ajusta a largura ao conteúdo */
+}
+
+#artilhariaTable th,
+#artilhariaTable td {
+  width: auto; /* Colunas se ajustam ao conteúdo */
+  max-width: none; /* Remove limite de largura */
+  white-space: nowrap; /* Evita quebra de texto */
+  padding: 4px 8px; /* Reduz padding para menos espaço */
 }
 
 /* Destaque visual para linhas */
 .victory-row {
-  background-color: #d4edda !important; /* Verde claro para vitórias */
+  background-color: #d4edda !important;
 }
 
 .defeat-row {
-  background-color: #e2e8f0 !important; /* Cinza claro para derrotas */
+  background-color: #e2e8f0 !important;
 }
 
 .draw-row {
-  background-color: #fff3cd !important; /* Amarelo claro para empates */
+  background-color: #fff3cd !important;
 }
 
 /* Estilo para ordenação */
@@ -185,20 +176,20 @@ th.sort-desc::after {
 
 /* Mensagem de erro */
 .bg-red-100 {
-  background-color: #f5e6e8 !important; /* Tom claro de vermelho */
+  background-color: #f5e6e8 !important;
 }
 
 .text-red-700 {
-  color: #d91a2a !important; /* Vermelho */
+  color: #d91a2a !important;
 }
 
 /* Estilo para notificações */
 .bg-yellow-100 {
-  background-color: #fef9e7 !important; /* Amarelo claro para notificações */
+  background-color: #fef9e7 !important;
 }
 
 .text-yellow-700 {
-  color: #d97706 !important; /* Amarelo escuro para o texto */
+  color: #d97706 !important;
 }
 
 @media (max-width: 768px) {
@@ -212,6 +203,13 @@ th.sort-desc::after {
   
   th, td {
     padding: 4px;
-    max-width: 150px; /* Reduzir largura das células no PIVOT em telas pequenas */
+    max-width: 150px;
+  }
+
+  /* Ajustes para Artilharia em mobile */
+  #artilhariaTable th,
+  #artilhariaTable td {
+    padding: 2px 4px; /* Menos padding em mobile */
+    max-width: none;
   }
 }
