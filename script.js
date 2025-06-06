@@ -6,10 +6,11 @@ const FIREBASE_URL = 'https://fpfs2025sub9-default-rtdb.firebaseio.com/';
 let allDataSheet1 = []; // Dados do nó jogos (Placar)
 let allDataClassification = []; // Dados do nó classificacao
 let filteredDataPlacar = []; // Placar
+let filteredDataClassification = []; // Classificação
 let sortConfigPlacar = { column: 18, direction: 'asc' }; // Default to Index column
 let allDataArtilharia = []; // Dados do nó artilharia
 
-// Função para normalizar strings (mantida conforme instrução)
+// Função para normalizar strings
 function normalizeString(str) {
   if (!str || typeof str !== 'string') return '';
   return str
@@ -56,17 +57,18 @@ async function fetchFirebaseData(node) {
         'Local', 'Rodada', 'Dia da Semana', 'Gol', 'Assistências', 'Vitória', 'Derrota', 'Empate', 'Considerar', 'Index'
       ];
       dataArray.push(headers);
+      const seenRows = new Set(); // Para rastrear linhas únicas
       Object.entries(data).forEach(([key, row]) => {
         const index = parseInt(key.split('_').pop()) || 0;
         const rowArray = [
           'FPFS Sub-9 2025',
           row['Data'] || '',
           row['Horário'] || '',
-          toTitleCase(row['Ginásio'] || ''), // Aplicar toTitleCase
-          toTitleCase(row['Mandante'] || ''), // Aplicar toTitleCase
+          toTitleCase(row['Ginásio'] || ''),
+          toTitleCase(row['Mandante'] || ''),
           row['Placar 1'] || '',
           row['Placar 2'] || '',
-          toTitleCase(row['Visitante'] || ''), // Aplicar toTitleCase
+          toTitleCase(row['Visitante'] || ''),
           '', '', '', '', '',
           row['Placar 1'] && row['Placar 2'] ? (parseInt(row['Placar 1']) > parseInt(row['Placar 2']) ? '1' : '0') : '',
           row['Placar 1'] && row['Placar 2'] ? (parseInt(row['Placar 1']) < parseInt(row['Placar 2']) ? '1' : '0') : '',
@@ -74,16 +76,25 @@ async function fetchFirebaseData(node) {
           row['Considerar'] || '1',
           index
         ];
-        dataArray.push(rowArray);
+        const rowKey = `${rowArray[1]}-${rowArray[4]}-${rowArray[7]}-${rowArray[5]}-${rowArray[6]}-${index}`;
+        if (!seenRows.has(rowKey)) {
+          seenRows.add(rowKey);
+          dataArray.push(rowArray);
+        } else {
+          console.warn(`Linha duplicada detectada e ignorada: ${rowKey}`);
+        }
       });
+      console.log(`Dados únicos processados para jogos:`, dataArray);
     } else if (node === 'classificacao') {
-      const headers = ['Posição', 'Time', 'Pontos', 'Jogos', 'Vitórias', 'Empates', 'Derrotas', 'Gols Pró', 'Gols Contra', 'Saldo', 'Aproveitamento'];
+      const headers = ['Index', 'Posição', 'Time', 'Pontos', 'Jogos', 'Vitórias', 'Empates', 'Derrotas', 'Gols Pró', 'Gols Contra', 'Saldo', 'Aproveitamento'];
       dataArray.push(headers);
       Object.entries(data).forEach(([key, row]) => {
         if (key === '0') return; // Ignora a chave 0
+        const index = parseInt(key.split('_').pop()) || 0;
         const rowArray = [
+          index,
           row['1'] || '',
-          toTitleCase(row['2'] || ''), // Aplicar toTitleCase
+          toTitleCase(row['2'] || ''),
           row['3'] || '',
           row['4'] || '',
           row['5'] || '',
@@ -115,6 +126,7 @@ async function fetchFirebaseData(node) {
     return dataArray;
   } catch (error) {
     console.error(`Erro ao buscar dados do ${node}:`, error.message);
+3713
     showError(`Erro ao carregar dados do ${node}: ${error.message}`);
     return [];
   }
@@ -122,10 +134,7 @@ async function fetchFirebaseData(node) {
 
 function showError(message) {
   const errorDiv = document.getElementById('errorMessage');
-  if (!errorDiv) {
-    console.error('Elemento #errorMessage não encontrado');
-    return;
-  }
+  if (!checkElement(errorDiv, '#errorMessage')) return;
   errorDiv.textContent = message;
   errorDiv.style.display = 'block';
   console.log('Erro exibido:', message);
@@ -133,13 +142,18 @@ function showError(message) {
 
 function clearError() {
   const errorDiv = document.getElementById('errorMessage');
-  if (!errorDiv) {
-    console.error('Elemento #errorMessage não encontrado');
-    return;
-  }
+  if (!checkElement(errorDiv, '#errorMessage')) return;
   errorDiv.textContent = '';
   errorDiv.style.display = 'none';
   console.log('Erro limpo');
+}
+
+function checkElement(element, id) {
+  if (!element) {
+    console.error(`Elemento ${id} não encontrado`);
+    return false;
+  }
+  return true;
 }
 
 function formatTime(timeStr) {
@@ -148,30 +162,33 @@ function formatTime(timeStr) {
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 }
 
-function populateFiltersSheet1(data) {
-  console.log('Populando filtros de Placar com', data);
+function populateFiltersSheet1(dataClassification, dataSheet1, dataArtilharia) {
+  console.log('Populando filtros para Placar, Classificação e Artilharia');
   const filters = [
-    { id: 'campeonato', index: 0 }
+    { id: 'time', indices: [4, 7], tab: 'placar' }, // Mandante e Visitante na aba Placar
+    { id: 'time', indices: [2], tab: 'classification' }, // Time na aba Classificação
+    { id: 'clube', indices: [2], tab: 'artilharia' }, // Clube na aba Artilharia
+    { id: 'jogador', indices: [1], tab: 'artilharia' } // Jogador na aba Artilharia
   ];
 
-  const tabs = ['placar'];
+  filters.forEach(filter => {
+    const select = document.getElementById(`${filter.id}-${filter.tab}`);
+    if (!checkElement(select, `#${filter.id}-${filter.tab}`)) return;
 
-  tabs.forEach(tab => {
-    filters.forEach(filter => {
-      const select = document.getElementById(`${filter.id}-${tab}`);
-      if (select) {
-        select.innerHTML = '<option value="">Todos</option>';
-        const values = [...new Set(data.slice(1).map(row => row[filter.index]?.trim()))].filter(v => v).sort();
-        values.forEach(value => {
-          const option = document.createElement('option');
-          option.value = value;
-          option.textContent = value;
-          select.appendChild(option);
-        });
-      } else {
-        console.error(`Elemento #${filter.id}-${tab} não encontrado no DOM`);
-      }
+    select.innerHTML = '<option value="">Todos</option>';
+    const data = filter.tab === 'placar' ? dataSheet1 : filter.tab === 'classification' ? dataClassification : dataArtilharia;
+    const values = [...new Set(
+      data.slice(1)
+        .flatMap(row => filter.indices.map(index => row[index]?.trim()))
+        .filter(v => v)
+    )].sort();
+    values.forEach(value => {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = value;
+      select.appendChild(option);
     });
+    console.log(`Filtro ${filter.id}-${filter.tab} populado com valores:`, values);
   });
 }
 
@@ -180,7 +197,7 @@ function sortData(data, columnIndex, direction) {
   sortedData.sort((a, b) => {
     let actualIndex = columnIndex;
     if (actualIndex >= 5) {
-      actualIndex = actualIndex === 5 ? 5 : actualIndex === 6 ? 6 : actualIndex === 18 ? 18 : actualIndex;
+      actualIndex = actualIndex === 5 ? 5 : actualIndex === 6 ? 6 : actualIndex === 18 ? null : actualIndex;
     }
 
     let valueA = a[actualIndex] || '';
@@ -222,14 +239,24 @@ function sortArtilhariaData(data) {
   return sortedData.slice(1);
 }
 
+function sortClassificationData(data) {
+  const sortedData = [...data];
+  sortedData.sort((a, b) => {
+    const indexA = parseInt(a[0]) || 0;
+    const indexB = parseInt(b[0]) || 0;
+    console.log(`Comparando: ${a[2]} (Índice ${indexA}) vs ${b[2]} (Índice ${indexB})`);
+    return indexA - indexB;
+  });
+  return sortedData.slice(1);
+}
+
 function displayData(data, filteredData, page) {
   console.log(`Exibindo dados para ${page}`, filteredData);
   clearError();
 
   const tbody = document.querySelector(`#${page}Body`);
   const thead = document.querySelector(`#tableHead-${page}`);
-  if (!tbody || !thead) {
-    console.error(`Elementos #${page}Body ou #tableHead-${page} não encontrados`);
+  if (!checkElement(tbody, `#${page}Body`) || !checkElement(thead, `#tableHead-${page}`)) {
     showError('Erro interno: tabela não encontrada.');
     return;
   }
@@ -278,7 +305,7 @@ function displayData(data, filteredData, page) {
     columnIndices.forEach(idx => {
       const td = document.createElement('td');
       const cell = row[idx];
-      td.textContent = idx === 2 ? formatTime(cell) : cell || ''; // Dados já formatados
+      td.textContent = idx === 2 ? formatTime(cell) : cell || '';
       td.className = 'p-2 border';
       tr.appendChild(td);
     });
@@ -287,17 +314,24 @@ function displayData(data, filteredData, page) {
 }
 
 function displayClassification() {
-  console.log('Exibindo dados da Classificação:', allDataClassification);
+  console.log('Exibindo dados da Classificação');
   clearError();
   const tbody = document.getElementById('classificationBody');
   const thead = document.getElementById('tableHead-classification');
-  if (!tbody || !thead) {
-    console.error('Elementos #classificationBody ou #tableHead-classification não encontrados');
+  if (!checkElement(tbody, '#classificationBody') || !checkElement(thead, '#tableHead-classification')) {
     showError('Erro interno: tabela não encontrada.');
     return;
   }
   tbody.innerHTML = '';
   thead.innerHTML = '';
+
+  const filters = {
+    time: document.getElementById('time-classification')?.value || ''
+  };
+  console.log('Filtros coletados para Classificação:', filters);
+
+  const filteredData = filterDataClassification(allDataClassification, filters);
+  console.log('Dados filtrados para Classificação:', filteredData);
 
   const trHead = document.createElement('tr');
   trHead.className = 'bg-gray-200';
@@ -310,26 +344,27 @@ function displayClassification() {
   });
   thead.appendChild(trHead);
 
-  const filteredData = allDataClassification.slice(1);
-  console.log('Dados a exibir na Classificação:', filteredData);
-  if (filteredData.length === 0) {
-    showError('Nenhum dado de classificação encontrado no nó classificacao.');
-  }
-
   filteredData.forEach(row => {
     const tr = document.createElement('tr');
     row.forEach(cell => {
       const td = document.createElement('td');
-      td.textContent = cell || ''; // Dados já formatados
+      td.textContent = cell || '';
       td.className = 'p-2 border';
       tr.appendChild(td);
     });
     tbody.appendChild(tr);
   });
+
+  if (filteredData.length === 0) {
+    showError('Nenhum time encontrado com os filtros aplicados.');
+  }
 }
 
 function filterDataSheet1(data, filters) {
   console.log('Aplicando filtros para placar:', filters);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   let filteredRows = data.slice(1).filter((row, index) => {
     if (!row || row.length < 18) {
@@ -348,6 +383,7 @@ function filterDataSheet1(data, filters) {
         const [day, month, year] = dataStr.split('/');
         if (day && month && year && year.length === 4) {
           dataJogo = new Date(`${year}-${month}-${day}`);
+          dataJogo.setHours(0, 0, 0, 0);
           if (isNaN(dataJogo.getTime())) {
             console.log(`Data inválida na linha ${index + 2}:`, dataStr);
             return false;
@@ -362,16 +398,22 @@ function filterDataSheet1(data, filters) {
       return false;
     }
 
+    if (dataJogo && dataJogo > today) {
+      console.log(`Linha ${index + 2} ignorada (data futura): ${dataStr}`);
+      return false;
+    }
+
     const dataInicio = filters.dataInicio ? new Date(filters.dataInicio) : null;
     const dataFim = filters.dataFim ? new Date(filters.dataFim) : null;
+    const time = filters.time ? filters.time.trim() : '';
 
     const result = (
-      (!filters.campeonato || campeonato === filters.campeonato) &&
       (!dataInicio || (dataJogo && dataJogo >= dataInicio)) &&
-      (!dataFim || (dataJogo && dataJogo <= dataFim))
+      (!dataFim || (dataJogo && dataJogo <= dataFim)) &&
+      (!time || mandante === time || visitante === time)
     );
 
-    console.log(`Linha ${index + 2}: Campeonato=${campeonato}, Data=${dataStr}, Passou=${result}`);
+    console.log(`Linha ${index + 2}: Data=${dataStr}, Mandante=${mandante}, Visitante=${visitante}, Time=${time}, Passou=${result}`);
     return result;
   }).sort((a, b) => {
     const indexA = parseInt(a[17]) || 0;
@@ -383,11 +425,66 @@ function filterDataSheet1(data, filters) {
   return filteredRows;
 }
 
+function filterDataClassification(data, filters) {
+  console.log('Aplicando filtros para classificação:', filters);
+
+  let filteredRows = data.slice(1).filter((row, index) => {
+    if (!row || row.length < 12) {
+      console.log(`Linha ${index + 2} inválida:`, row);
+      return false;
+    }
+
+    const time = filters.time ? filters.time.trim() : '';
+    const teamName = row[2]; // Coluna 'Time' na classificação
+
+    const result = (!time || teamName === time);
+    console.log(`Linha ${index + 2}: Time=${teamName}, Filtro Time=${time}, Passou=${result}`);
+    return result;
+  }).sort((a, b) => {
+    const indexA = parseInt(a[0]) || 0;
+    const indexB = parseInt(b[0]) || 0;
+    return indexA - indexB;
+  });
+
+  console.log('Dados filtrados e ordenados por Index:', filteredRows);
+  return filteredRows;
+}
+
+function filterDataArtilharia(data, filters) {
+  console.log('Aplicando filtros para artilharia:', filters);
+
+  let filteredRows = data.slice(1).filter((row, index) => {
+    if (!row || row.length < 4) {
+      console.log(`Linha ${index + 2} inválida:`, row);
+      return false;
+    }
+
+    const clube = filters.clube ? filters.clube.trim() : '';
+    const jogador = filters.jogador ? filters.jogador.trim() : '';
+    const rowClube = row[2]; // Coluna 'Clube' na artilharia
+    const rowJogador = row[1]; // Coluna 'Jogador' na artilharia
+
+    const result = (
+      (!clube || rowClube === clube) &&
+      (!jogador || rowJogador === jogador)
+    );
+    console.log(`Linha ${index + 2}: Clube=${rowClube}, Jogador=${rowJogador}, Filtro Clube=${clube}, Filtro Jogador=${jogador}, Passou=${result}`);
+    return result;
+  }).sort((a, b) => {
+    const indexA = parseInt(a[0]) || 0;
+    const indexB = parseInt(b[0]) || 0;
+    return indexA - indexB;
+  });
+
+  console.log('Dados filtrados e ordenados por Index:', filteredRows);
+  return filteredRows;
+}
+
 function displayPlacar() {
   const filters = {
     dataInicio: document.getElementById('dataInicio-placar')?.value || '',
     dataFim: document.getElementById('dataFim-placar')?.value || '',
-    campeonato: document.getElementById('campeonato-placar')?.value || ''
+    time: document.getElementById('time-placar')?.value || ''
   };
   console.log('Filtros coletados:', filters);
 
@@ -403,17 +500,25 @@ function displayPlacar() {
 }
 
 function displayArtilharia() {
-  console.log('Exibindo dados da Artilharia:', allDataArtilharia);
+  console.log('Exibindo dados da Artilharia');
   clearError();
   const tbody = document.getElementById('artilhariaBody');
   const thead = document.getElementById('tableHead-artilharia');
-  if (!tbody || !thead) {
-    console.error('Elementos #artilhariaBody ou #tableHead-artilharia não encontrados');
+  if (!checkElement(tbody, '#artilhariaBody') || !checkElement(thead, '#tableHead-artilharia')) {
     showError('Erro interno: tabela não encontrada.');
     return;
   }
   tbody.innerHTML = '';
   thead.innerHTML = '';
+
+  const filters = {
+    clube: document.getElementById('clube-artilharia')?.value || '',
+    jogador: document.getElementById('jogador-artilharia')?.value || ''
+  };
+  console.log('Filtros coletados para Artilharia:', filters);
+
+  const filteredData = filterDataArtilharia(allDataArtilharia, filters);
+  console.log('Dados filtrados para Artilharia:', filteredData);
 
   const trHead = document.createElement('tr');
   trHead.className = 'bg-gray-200';
@@ -426,10 +531,8 @@ function displayArtilharia() {
   });
   thead.appendChild(trHead);
 
-  const filteredData = sortArtilhariaData(allDataArtilharia);
-  console.log('Dados a exibir na Artilharia:', filteredData);
   if (filteredData.length === 0) {
-    showError('Nenhum dado de artilharia encontrado no nó artilharia.');
+    showError('Nenhum jogador encontrado com os filtros aplicados.');
   }
 
   filteredData.forEach(row => {
@@ -446,12 +549,26 @@ function displayArtilharia() {
 
 function clearFilters(tabId) {
   if (tabId === 'placar') {
-    const elements = ['campeonato-placar', 'dataInicio-placar', 'dataFim-placar'];
+    const elements = ['dataInicio-placar', 'dataFim-placar', 'time-placar'];
     elements.forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
     displayPlacar();
+  } else if (tabId === 'classification') {
+    const elements = ['dataInicio-classification', 'dataFim-classification', 'time-classification'];
+    elements.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    displayClassification();
+  } else if (tabId === 'artilharia') {
+    const elements = ['clube-artilharia', 'jogador-artilharia'];
+    elements.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    displayArtilharia();
   }
 }
 
@@ -493,22 +610,33 @@ async function init() {
       return;
     }
     if (allDataArtilharia.length <= 1) {
-      console.error('Nenhum dado retornado do nó artilharia');
-      showError('Nenhum dado disponível no nó artilharia.');
+      console.error('Erro ao carregar dados da artilharia');
+      showError('Nenhum dado carregado para artilharia. Verifique o servidor.');
       return;
     }
 
-    populateFiltersSheet1(allDataSheet1);
+    populateFiltersSheet1(allDataClassification, allDataSheet1, allDataArtilharia);
     console.log('Filtros populados');
 
     const classificationBtn = document.getElementById('classification-btn');
     const placarBtn = document.getElementById('placar-btn');
     const artilhariaBtn = document.getElementById('artilharia-btn');
-    const aplicarFiltrosBtn = document.getElementById('aplicarFiltros-placar');
-    const limparFiltrosBtn = document.getElementById('limparFiltros-placar');
+    const aplicarFiltrosPlacarBtn = document.getElementById('aplicarFiltros-placar');
+    const limparFiltrosPlacarBtn = document.getElementById('limparFiltros-placar');
+    const aplicarFiltrosClassificationBtn = document.getElementById('aplicarFiltros-classification');
+    const limparFiltrosClassificationBtn = document.getElementById('limparFiltros-classification');
+    const aplicarFiltrosArtilhariaBtn = document.getElementById('aplicarFiltros-artilharia');
+    const limparFiltrosArtilhariaBtn = document.getElementById('limparFiltros-artilharia');
 
-    if (!classificationBtn || !placarBtn || !artilhariaBtn || !aplicarFiltrosBtn || !limparFiltrosBtn) {
-      console.error('Botões não encontrados:', { classificationBtn, placarBtn, artilhariaBtn, aplicarFiltrosBtn, limparFiltrosBtn });
+    if (!checkElement(classificationBtn, '#classification-btn') ||
+        !checkElement(placarBtn, '#placar-btn') ||
+        !checkElement(artilhariaBtn, '#artilharia-btn') ||
+        !checkElement(aplicarFiltrosPlacarBtn, '#aplicarFiltros-placar') ||
+        !checkElement(limparFiltrosPlacarBtn, '#limparFiltros-placar') ||
+        !checkElement(aplicarFiltrosClassificationBtn, '#aplicarFiltros-classification') ||
+        !checkElement(limparFiltrosClassificationBtn, '#limparFiltros-classification') ||
+        !checkElement(aplicarFiltrosArtilhariaBtn, '#aplicarFiltros-artilharia') ||
+        !checkElement(limparFiltrosArtilhariaBtn, '#limparFiltros-artilharia')) {
       showError('Erro interno: botões de navegação não encontrados.');
       return;
     }
@@ -525,13 +653,29 @@ async function init() {
       console.log('Clique no botão da Artilharia');
       showTab('artilharia');
     });
-    aplicarFiltrosBtn.addEventListener('click', () => {
-      console.log('Botão Aplicar Filtros clicado');
+    aplicarFiltrosPlacarBtn.addEventListener('click', () => {
+      console.log('Botão Aplicar Filtros (Placar) clicado');
       displayPlacar();
     });
-    limparFiltrosBtn.addEventListener('click', () => {
+    limparFiltrosPlacarBtn.addEventListener('click', () => {
       console.log('Limpando filtros (Placar)');
       clearFilters('placar');
+    });
+    aplicarFiltrosClassificationBtn.addEventListener('click', () => {
+      console.log('Botão Aplicar Filtros (Classificação) clicado');
+      displayClassification();
+    });
+    limparFiltrosClassificationBtn.addEventListener('click', () => {
+      console.log('Limpando filtros (Classificação)');
+      clearFilters('classification');
+    });
+    aplicarFiltrosArtilhariaBtn.addEventListener('click', () => {
+      console.log('Botão Aplicar Filtros (Artilharia) clicado');
+      displayArtilharia();
+    });
+    limparFiltrosArtilhariaBtn.addEventListener('click', () => {
+      console.log('Limpando filtros (Artilharia)');
+      clearFilters('artilharia');
     });
 
     showTab('placar');

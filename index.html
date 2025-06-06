@@ -38,77 +38,150 @@
         return gk_fileData[filename] || "";
         }
         </script><!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jogos da FPFS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.json">
 </head>
-<body class="bg-gray-100">
+<body>
   <header class="header">
-    <h1 class="text-2xl font-bold">Jogos da FPFS</h1>
+    <h1>Jogos da FPFS</h1>
   </header>
 
   <nav class="tab-navigation">
+    <button id="placar-btn" class="tab-button active-tab">Placar</button>
     <button id="classification-btn" class="tab-button">Classificação</button>
-    <button id="placar-btn" class="tab-button">Placar</button>
     <button id="artilharia-btn" class="tab-button">Artilharia</button>
   </nav>
 
+  <div id="errorMessage" class="bg-red-100 text-red-700 p-4 mb-4 hidden"></div>
   <main class="container mx-auto p-4">
     <div id="errorMessage" class="hidden bg-red-100 text-red-700 p-2 rounded mb-4"></div>
 
-    <div id="classification" class="tab-content">
-      <div class="overflow-x-auto">
-        <table id="classificationTable" class="w-full border-collapse">
-          <thead id="tableHead-classification"></thead>
-          <tbody id="classificationBody"></tbody>
-        </table>
-      </div>
-    </div>
 
-    <div id="placar" class="tab-content">
-      <div class="filters mb-4">
-        <h2 class="text-lg font-semibold">Filtros</h2>
-        <details class="md:open">
-          <summary class="cursor-pointer font-semibold">Abrir Filtros</summary>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
-            <div>
-              <label for="dataInicio-placar" class="block text-sm font-medium text-gray-700">Data Início:</label>
-              <input type="date" id="dataInicio-placar" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-            </div>
-            <div>
-              <label for="dataFim-placar" class="block text-sm font-medium text-gray-700">Data Fim:</label>
-              <input type="date" id="dataFim-placar" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-            </div>
-          </div>
-          <div class="mt-4 flex gap-2">
-            <button id="aplicarFiltros-placar" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Aplicar Filtros</button>
-            <button id="limparFiltros-placar" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Limpar Filtros</button>
-          </div>
-        </details>
+<div id="placar" class="tab-content">
+  <div class="filters mb-4">
+    <h2 class="text-lg font-semibold">Filtros</h2>
+    <details class="md:open">
+      <summary class="cursor-pointer font-semibold">Abrir Filtros</summary>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+        <div>
+          <label for="time-placar" class="block text-sm font-medium text-gray-700">Time:</label>
+          <select id="time-placar" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+            <option value="">Todos</option>
+          </select>
+        </div>
       </div>
-      <div class="overflow-x-auto">
-        <table id="placarTable" class="min-w-full bg-white border border-gray-300">
-          <thead id="tableHead-placar"></thead>
-          <tbody id="placarBody"></tbody>
-        </table>
+      <div class="mt-4 flex gap-2">
+        <button id="aplicarFiltros-placar" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Aplicar Filtros</button>
+        <button id="limparFiltros-placar" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Limpar Filtros</button>
       </div>
-    </div>
+    </details>
 
-    <div id="artilharia" class="tab-content">
-      <div class="overflow-x-auto">
-        <table id="artilhariaTable" class="min-w-full bg-white border border-gray-300">
-          <thead id="tableHead-artilharia"></thead>
-          <tbody id="artilhariaBody"></tbody>
-        </table>
+
+  </div>
+  <div class=""tab-content">
+    <table class="w-full">
+      <thead id="tableHead-placar"></thead>
+      <tbody id="placarBody"></tbody>
+    </table>
+  </div>
+</div>
+
+  <div id="classification" class="tab-content">
+    <div class="filters mb-4">
+      <h2 class="text-lg font-semibold">Filtros</h2>
+      <details class="md:open">
+        <summary class="cursor-pointer font-semibold">Abrir Filtros</summary>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+          <div>
+            <label for="time-classification" class="block text-sm font-medium text-gray-700">Time:</label>
+            <select id="time-classification" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+              <option value="">Todos</option>
+            </select>
+          </div>
+        </div>
+        <div class="mt-4 flex gap-2">
+          <button id="aplicarFiltros-classification" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Aplicar Filtros</button>
+          <button id="limparFiltros-classification" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Limpar Filtros</button>
+        </div>
+      </details>
+    </div>
+    <table class="w-full">
+      <thead id="tableHead-classification"></thead>
+      <tbody id="classificationBody"></tbody>
+    </table>
+  </div>
+
+
+
+
+
+
+
+<div id="artilharia" class="tab-content">
+  <div class="filters mb-4">
+    <h2 class="text-lg font-semibold">Filtros</h2>
+    <details class="md:open">
+      <summary class="cursor-pointer font-semibold">Abrir Filtros</summary>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+        <div>
+          <label for="clube-artilharia"" class="block text-sm font-medium text-gray-700">Clube:</label>
+          <select id="clube-artilharia" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+		  </select>
+        </div>
+        <div>
+          <label for="jogador-artilharia class="block text-sm font-medium text-gray-700">Jogador:</label>
+          <select id="jogador-artilharia" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+		  </select>
+		</div>
+      </div>
+      <div class="mt-4 flex gap-2">
+        <button id="aplicarFiltros-artilharia" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Aplicar Filtros</button>
+        <button id="limparFiltros-artilharia" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Limpar Filtros</button>
+      </div>
+    </details>
+    <table>
+      <thead id="tableHead-artilharia"></thead>
+      <tbody id="artilhariaBody"></tbody>
+    </table>
+
+
+
+
+<!--
+  <div id="artilharia" class="tab-content">
+    <div class="filters bg-white p-4 mb-4">
+      <h2>Filtros</h2>
+      <button id="toggleFiltros-artilharia" class="bg-blue-500 text-white p-2">Abrir Filtros</button>
+      <div id="filtros-artilharia" class="hidden mt-2">
+        <label for="clube-artilharia">Clube:</label>
+        <select id="clube-artilharia" class="border p-1">
+          <option value="">Todos</option>
+        </select>
+        <label for="jogador-artilharia">Jogador:</label>
+        <select id="jogador-artilharia" class="border p-1">
+          <option value="">Todos</option>
+        </select>
+        <div class="mt-2">
+          <button id="aplicarFiltros-artilharia" class="bg-green-500 text-white p-2">Aplicar Filtros</button>
+          <button id="limparFiltros-artilharia" class="bg-gray-500 text-white p-2">Limpar Filtros</button>
+        </div>
       </div>
     </div>
-  </main>
+    <table>
+      <thead id="tableHead-artilharia"></thead>
+      <tbody id="artilhariaBody"></tbody>
+    </table>
+  </div>
+-->
 
   <footer class="footer">
     <p>© 2025 Jogos da FPFS</p>
