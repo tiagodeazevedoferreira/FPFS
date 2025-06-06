@@ -1,3 +1,4 @@
+```css
 body {
   font-family: 'Roboto', sans-serif;
   background-color: #f9f9f9 !important; /* Sobrescrever Tailwind bg-gray-100 */
@@ -54,12 +55,14 @@ body {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: #3b82f6 #f2f2f2;
+  margin: 0; /* Remove margens extras */
 }
 
 /* Estilo específico para o .table-container da aba Artilharia */
 #artilharia .table-container {
   width: auto !important; /* Ajusta ao conteúdo da tabela */
-  display: inline-block; /* Permite encolher ao tamanho da tabela */
+  min-width: 0 !important; /* Remove largura mínima */
+  display: block; /* Substitui inline-block para evitar espaços extras */
 }
 
 /* Estilizar a barra de rolagem */
@@ -121,6 +124,7 @@ th {
   width: auto !important; /* Ajusta ao conteúdo */
   min-width: 0 !important; /* Remove largura mínima */
   table-layout: auto !important; /* Colunas baseadas no conteúdo */
+  margin: 0 !important; /* Remove margens extras */
 }
 
 #artilhariaTable th,
@@ -128,11 +132,8 @@ th {
   width: auto !important; /* Colunas se ajustam ao texto */
   max-width: none !important; /* Remove limite de largura */
   white-space: nowrap !important; /* Evita quebra de texto */
-  padding: 4px 6px !important; /* Menos padding para colunas mais estreitas */
-}
-
-#artilhariaTable th {
-  text-align: center; /* Centraliza cabeçalhos para melhor visual */
+  padding: 4px 6px !important; /* Menos padding */
+  text-align: center; /* Centraliza para melhor visual */
 }
 
 /* Destaque visual para linhas */
@@ -224,3 +225,4 @@ th.sort-desc::after {
     max-width: none !important;
   }
 }
+```
