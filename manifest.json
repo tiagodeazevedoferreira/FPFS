@@ -1,8 +1,8 @@
 {
-  "name": "Controle de Jogos de Futebol",
-  "short_name": "Jogos Futebol",
-  "description": "Aplicação para controle de jogos de futebol",
-  "start_url": "https://tiagodeazevedoferreira.github.io/TesteAplicativoFutebol/",
+  "name": "Jogos FPFS",
+  "short_name": "Jogos da FPFS",
+  "description": "Aplicação para controle de jogos da federação paulista de futsal",
+  "start_url": "https://tiagodeazevedoferreira.github.io/FPFS/",
   "scope": "/TesteAplicativoFutebol/",
   "display": "standalone",
   "background_color": "#ffffff",
