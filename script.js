@@ -55,7 +55,7 @@ async function fetchFirebaseData(node) {
     if (node === 'jogos') {
       const headers = [
         'Campeonato', 'Data', 'Horário', 'Ginásio', 'Mandante', 'Placar 1', 'Placar 2', 'Visitante',
-        'Local', 'Rodada', 'Dia da Semana', 'Gol', 'Assistências', 'Vitória', 'Derrota', 'Empate', 'Considerar', 'Index'
+        'Local', 'Rodada', 'Dia da Semana', 'Gol', 'Assistências', 'Vitória', 'Derrota', 'Empate', 'considerar', 'Index'
       ];
       dataArray.push(headers);
       const seenRows = new Set(); // Para rastrear linhas únicas
@@ -584,12 +584,12 @@ function displayEstatisticas() {
     }
   });
 
-  // Ordenar times por número de gols em ordem decrescente
-  const sortedTeams = Object.entries(golsPorTime).sort((a, b) => b[1] - a[1]);
+  // Ordenar times por número de gols em ordem decrescente e limitar aos 10 primeiros
+  const sortedTeams = Object.entries(golsPorTime).sort((a, b) => b[1] - a[1]).slice(0, 10);
   const labels = sortedTeams.map(([team]) => team);
   const data = sortedTeams.map(([_, gols]) => gols);
 
-  console.log('Dados para o gráfico:', { labels, data });
+  console.log('Dados para o gráfico (10 primeiros):', { labels, data });
 
   // Destruir gráfico existente, se houver
   if (golsPorTimeChart) {
@@ -629,9 +629,13 @@ function displayEstatisticas() {
             text: 'Times'
           },
           ticks: {
-            rotation: 90,
+            rotation: 90, // Rotaciona labels a 90 graus
             autoSkip: false,
-            maxTicksLimit: Infinity
+            maxTicksLimit: 10,
+            font: {
+              size: 12
+            },
+            padding: 10
           }
         }
       },
@@ -642,7 +646,7 @@ function displayEstatisticas() {
         },
         title: {
           display: true,
-          text: 'Gols por Time - FPFS Sub-9 2025'
+          text: 'Gols por Time - FPFS Sub-9 2025 (Top 10)'
         }
       }
     }
@@ -810,6 +814,13 @@ async function init() {
       console.log('Limpando filtros (Estatísticas)');
       clearFilters('estatisticas');
     });
+
+    // Registrar Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('Service Worker registrado com sucesso'))
+        .catch(error => console.error('Erro ao registrar Service Worker:', error));
+    }
 
     showTab('placar');
   } catch (error) {
