@@ -1,4 +1,4 @@
-console.log('script.js iniciado');
+console.log('Script.js iniciado');
 
 // URL base do Firebase Realtime Database
 const FIREBASE_URL = 'https://fpfs2025sub9-default-rtdb.firebaseio.com/';
@@ -584,12 +584,12 @@ function displayEstatisticas() {
     }
   });
 
-  // Ordenar times por número de gols em ordem decrescente e limitar aos 10 primeiros
-  const sortedTeams = Object.entries(golsPorTime).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  // Ordenar times por número de gols em ordem decrescente
+  const sortedTeams = Object.entries(golsPorTime).sort((a, b) => b[1] - a[1]);
   const labels = sortedTeams.map(([team]) => team);
   const data = sortedTeams.map(([_, gols]) => gols);
 
-  console.log('Dados para o gráfico (10 primeiros):', { labels, data });
+  console.log('Dados para o gráfico (todos os times):', { labels, data });
 
   // Destruir gráfico existente, se houver
   if (golsPorTimeChart) {
@@ -629,11 +629,10 @@ function displayEstatisticas() {
             text: 'Times'
           },
           ticks: {
-            rotation: 90, // Rotaciona labels a 90 graus
+            rotation: 90,
             autoSkip: false,
-            maxTicksLimit: 10,
             font: {
-              size: 12
+              size: 10 // Alterado para fonte tamanho 10
             },
             padding: 10
           }
@@ -641,15 +640,46 @@ function displayEstatisticas() {
       },
       plugins: {
         legend: {
-          display: true,
-          position: 'top'
+          display: false // Remover legenda
         },
         title: {
           display: true,
-          text: 'Gols por Time - FPFS Sub-9 2025 (Top 10)'
+          text: 'Gols por Time' // Novo título
+        },
+        // Adicionar valores acima das barras
+        datalabels: {
+          anchor: 'end',
+          align: 'top',
+          offset: 4,
+          font: {
+            size: 10
+          },
+          color: '#000'
         }
       }
-    }
+    },
+    plugins: [{
+      id: 'customDatalabels',
+      afterDraw: (chart) => {
+        const ctx = chart.ctx;
+        chart.data.datasets.forEach((dataset, datasetIndex) => {
+          const meta = chart.getDatasetMeta(datasetIndex);
+          meta.data.forEach((bar, index) => {
+            const value = dataset.data[index];
+            if (value > 0) { // Exibir apenas se valor for positivo
+              const x = bar.x;
+              const y = bar.y - 10; // Ajuste vertical
+              ctx.save();
+              ctx.textAlign = 'center';
+              ctx.font = '10px Arial';
+              ctx.fillStyle = '#000';
+              ctx.fillText(value, x, y);
+              ctx.restore();
+            }
+          });
+        });
+      }
+    }]
   });
 
   if (labels.length === 0) {
