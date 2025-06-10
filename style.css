@@ -90,6 +90,16 @@ body {
   display: block;
 }
 
+#estatisticas .chart-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 .footer {
   text-align: center;
   background-color: #1e40af;
@@ -263,6 +273,11 @@ th.sort-desc::after {
   }
 
   .chart-container {
+    max-width: 100%;
+    padding: 0.5rem;
+  }
+
+  #estatisticas .chart-container {
     max-width: 100%;
     padding: 0.5rem;
   }

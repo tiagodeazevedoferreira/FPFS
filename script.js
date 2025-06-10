@@ -9,6 +9,7 @@ let filteredDataPlacar = []; // Placar
 let filteredDataClassification = []; // Classificação
 let sortConfigPlacar = { column: 18, direction: 'asc' }; // Default to Index column
 let allDataArtilharia = []; // Dados do nó artilharia
+let golsPorTimeChart = null; // Referência ao gráfico Chart.js
 
 // Função para normalizar strings
 function normalizeString(str) {
@@ -162,12 +163,14 @@ function formatTime(timeStr) {
 }
 
 function populateFiltersSheet1(dataClassification, dataSheet1, dataArtilharia) {
-  console.log('Populando filtros para Placar, Classificação e Artilharia');
+  console.log('Populando filtros para Placar, Classificação, Artilharia e Estatísticas');
   const filters = [
     { id: 'time', indices: [4, 7], tab: 'placar' }, // Mandante e Visitante na aba Placar
     { id: 'time', indices: [2], tab: 'classification' }, // Time na aba Classificação
     { id: 'clube', indices: [2], tab: 'artilharia' }, // Time na aba Artilharia
-    { id: 'jogador', indices: [1], tab: 'artilharia' } // Jogador na aba Artilharia
+    { id: 'jogador', indices: [1], tab: 'artilharia' }, // Jogador na aba Artilharia
+    { id: 'clube', indices: [2], tab: 'estatisticas' }, // Time na aba Estatísticas
+    { id: 'jogador', indices: [1], tab: 'estatisticas' } // Jogador na aba Estatísticas
   ];
 
   filters.forEach(filter => {
@@ -546,6 +549,103 @@ function displayArtilharia() {
   });
 }
 
+function displayEstatisticas() {
+  console.log('Exibindo dados da Estatísticas');
+  clearError();
+  const canvas = document.getElementById('golsPorTimeChart');
+  if (!checkElement(canvas, '#golsPorTimeChart')) {
+    showError('Erro interno: canvas do gráfico não encontrado.');
+    return;
+  }
+
+  const filters = {
+    clube: document.getElementById('clube-estatisticas')?.value || '',
+    jogador: document.getElementById('jogador-estatisticas')?.value || ''
+  };
+  console.log('Filtros coletados para Estatísticas:', filters);
+
+  const filteredData = filterDataArtilharia(allDataArtilharia, filters);
+  console.log('Dados filtrados para Estatísticas:', filteredData);
+
+  // Calcular gols por time
+  const golsPorTime = {};
+  filteredData.forEach(row => {
+    const time = row[2]; // Coluna 'Time'
+    const gols = parseInt(row[3]) || 0; // Coluna 'Gols'
+    if (time) {
+      golsPorTime[time] = (golsPorTime[time] || 0) + gols;
+    }
+  });
+
+  // Ordenar times por número de gols em ordem decrescente
+  const sortedTeams = Object.entries(golsPorTime).sort((a, b) => b[1] - a[1]);
+  const labels = sortedTeams.map(([team]) => team);
+  const data = sortedTeams.map(([_, gols]) => gols);
+
+  console.log('Dados para o gráfico:', { labels, data });
+
+  // Destruir gráfico existente, se houver
+  if (golsPorTimeChart) {
+    golsPorTimeChart.destroy();
+  }
+
+  // Criar novo gráfico
+  golsPorTimeChart = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Gols por Time',
+        data: data,
+        backgroundColor: '#3b82f6',
+        borderColor: '#1d4ed8',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Gols'
+          },
+          ticks: {
+            stepSize: 1
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Times'
+          },
+          ticks: {
+            rotation: 90,
+            autoSkip: false,
+            maxTicksLimit: Infinity
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top'
+        },
+        title: {
+          display: true,
+          text: 'Gols por Time - FPFS Sub-9 2025'
+        }
+      }
+    }
+  });
+
+  if (labels.length === 0) {
+    showError('Nenhum dado disponível para o gráfico com os filtros aplicados.');
+  }
+}
+
 function clearFilters(tabId) {
   if (tabId === 'placar') {
     const elements = ['dataInicio-placar', 'dataFim-placar', 'time-placar'];
@@ -568,6 +668,13 @@ function clearFilters(tabId) {
       if (el) el.value = '';
     });
     displayArtilharia();
+  } else if (tabId === 'estatisticas') {
+    const elements = ['clube-estatisticas', 'jogador-estatisticas'];
+    elements.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    displayEstatisticas();
   }
 }
 
@@ -586,6 +693,7 @@ function showTab(tabId) {
   if (tabId === 'classification') displayClassification();
   else if (tabId === 'placar') displayPlacar();
   else if (tabId === 'artilharia') displayArtilharia();
+  else if (tabId === 'estatisticas') displayEstatisticas();
 }
 
 async function init() {
@@ -620,37 +728,31 @@ async function init() {
     const classificationBtn = document.getElementById('classification-btn');
     const placarBtn = document.getElementById('placar-btn');
     const artilhariaBtn = document.getElementById('artilharia-btn');
+    const estatisticasBtn = document.getElementById('estatisticas-btn');
     const aplicarFiltrosPlacarBtn = document.getElementById('aplicarFiltros-placar');
     const limparFiltrosPlacarBtn = document.getElementById('limparFiltros-placar');
     const aplicarFiltrosClassificationBtn = document.getElementById('aplicarFiltros-classification');
     const limparFiltrosClassificationBtn = document.getElementById('limparFiltros-classification');
     const aplicarFiltrosArtilhariaBtn = document.getElementById('aplicarFiltros-artilharia');
     const limparFiltrosArtilhariaBtn = document.getElementById('limparFiltros-artilharia');
+    const aplicarFiltrosEstatisticasBtn = document.getElementById('aplicarFiltros-estatisticas');
+    const limparFiltrosEstatisticasBtn = document.getElementById('limparFiltros-estatisticas');
 
     // Verificação dos botões obrigatórios
     if (!checkElement(classificationBtn, '#classification-btn') ||
         !checkElement(placarBtn, '#placar-btn') ||
         !checkElement(artilhariaBtn, '#artilharia-btn') ||
+        !checkElement(estatisticasBtn, '#estatisticas-btn') ||
         !checkElement(aplicarFiltrosPlacarBtn, '#aplicarFiltros-placar') ||
         !checkElement(limparFiltrosPlacarBtn, '#limparFiltros-placar') ||
         !checkElement(aplicarFiltrosClassificationBtn, '#aplicarFiltros-classification') ||
-        !checkElement(limparFiltrosClassificationBtn, '#limparFiltros-classification')) {
+        !checkElement(limparFiltrosClassificationBtn, '#limparFiltros-classification') ||
+        !checkElement(aplicarFiltrosArtilhariaBtn, '#aplicarFiltros-artilharia') ||
+        !checkElement(limparFiltrosArtilhariaBtn, '#limparFiltros-artilharia') ||
+        !checkElement(aplicarFiltrosEstatisticasBtn, '#aplicarFiltros-estatisticas') ||
+        !checkElement(limparFiltrosEstatisticasBtn, '#limparFiltros-estatisticas')) {
       showError('Erro interno: botões de navegação não encontrados.');
       return;
-    }
-
-    // Verificação condicional para botões da aba Artilharia
-    if (aplicarFiltrosArtilhariaBtn && limparFiltrosArtilhariaBtn) {
-      aplicarFiltrosArtilhariaBtn.addEventListener('click', () => {
-        console.log('Botão Aplicar Filtros (Artilharia) clicado');
-        displayArtilharia();
-      });
-      limparFiltrosArtilhariaBtn.addEventListener('click', () => {
-        console.log('Limpando filtros (Artilharia)');
-        clearFilters('artilharia');
-      });
-    } else {
-      console.warn('Botões de filtros da aba Artilharia não encontrados. Pulando a adição de event listeners.');
     }
 
     classificationBtn.addEventListener('click', () => {
@@ -664,6 +766,10 @@ async function init() {
     artilhariaBtn.addEventListener('click', () => {
       console.log('Clique no botão da Artilharia');
       showTab('artilharia');
+    });
+    estatisticasBtn.addEventListener('click', () => {
+      console.log('Clique no botão da Estatísticas');
+      showTab('estatisticas');
     });
     aplicarFiltrosPlacarBtn.addEventListener('click', () => {
       console.log('Botão Aplicar Filtros (Placar) clicado');
@@ -680,6 +786,22 @@ async function init() {
     limparFiltrosClassificationBtn.addEventListener('click', () => {
       console.log('Limpando filtros (Classificação)');
       clearFilters('classification');
+    });
+    aplicarFiltrosArtilhariaBtn.addEventListener('click', () => {
+      console.log('Botão Aplicar Filtros (Artilharia) clicado');
+      displayArtilharia();
+    });
+    limparFiltrosArtilhariaBtn.addEventListener('click', () => {
+      console.log('Limpando filtros (Artilharia)');
+      clearFilters('artilharia');
+    });
+    aplicarFiltrosEstatisticasBtn.addEventListener('click', () => {
+      console.log('Botão Aplicar Filtros (Estatísticas) clicado');
+      displayEstatisticas();
+    });
+    limparFiltrosEstatisticasBtn.addEventListener('click', () => {
+      console.log('Limpando filtros (Estatísticas)');
+      clearFilters('estatisticas');
     });
 
     showTab('placar');

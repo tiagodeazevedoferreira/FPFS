@@ -43,13 +43,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jogos da FPFS</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <link rel="stylesheet" href="style.css">
+  <script src="./js/chart.umd.min.js"></script>
   <link rel="manifest" href="manifest.json">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link href="style.css" rel="stylesheet">
   
@@ -69,9 +65,17 @@
     <button class="tab-button" id="artilharia-btn" aria-label="Exibir aba Artilharia" tabindex="0">
       <i class="fas fa-futbol" aria-hidden="true"></i> Artilharia
     </button>
+    <button class="tab-button" id="estatisticas-btn" aria-label="Exibir aba Estatísticas" tabindex="0">
+      <i class="fa-solid fa-chart-simple" aria-hidden="true"></i> Estatísticas</i>
+    </button>
+
   </nav>
 
+  <div id="errorMessage" class="text-red-600 text-center p-2 hidden"></div>
+
   <main>
+    <div id="errorMessage" class="bg-red-100 text-red-700 p-2 text-center" style="display: none;"></div>
+
 <div id="placar" class="tab-content active">
   <div class="filters mb-4">
     <h2 class="text-lg font-semibold">Filtros</h2>
@@ -111,7 +115,7 @@
   </div>
 </div>
 
- <div id="classification" class="tab-content active">
+<div id="classification" class="tab-content active">
     <div class="filters mb-4">
       <h2 class="text-lg font-semibold">Filtros</h2>
       <details class="md:open">
@@ -138,7 +142,6 @@
     </table>
   </div>
 </div>
-
 
 <div id="artilharia" class="tab-content active">
   <div class="filters mb-4">
@@ -171,13 +174,46 @@
     </table>
  </div>
 </div>
+
+ <div id="estatisticas" class="tab-content active">
+  <div class="filters mb-4">
+    <h2 class="text-lg font-semibold">Filtros</h2>
+    <details class="md:open">
+      <summary class="cursor-pointer font-semibold">Abrir Filtros</summary>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+        <div>
+          <label for="clube-estatisticas"" class="block text-sm font-medium text-gray-700">Clube:</label>
+          <select id="clube-estatisticas" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+             <option value="">Todos</option>
+		  </select>
+        </div>
+        <div>
+          <label for="jogador-estatisticas class="block text-sm font-medium text-gray-700">Jogador:</label>
+          <select id="jogador-estatisticas" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+		  </select>
+		</div>
+      </div>
+      <div class="mt-4 flex gap-2">
+        <button id="aplicarFiltros-estatisticas" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Aplicar Filtros</button>
+        <button id="limparFiltros-estatisticas" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Limpar Filtros</button>
+      </div>
+    </details>
+   </div>
+
+  <div class="table-container">
+        <canvas id="golsPorTimeChart"></canvas>
+      </div>
+    </div>
   </main>
+
+
+
+
 
   <footer class="footer">
     <p>© 2025 Jogos da FPFS</p>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
