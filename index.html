@@ -48,6 +48,18 @@
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link href="style.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" integrity="sha256-t2bkeNy3+upX+8i40Xb2bQ2b+5dU+MtRNCTeN4bZ+Zw=" crossorigin="anonymous"></script>
+  <script>
+    // Fallback para outro CDN se o primeiro falhar
+    if (typeof Chart === 'undefined') {
+      console.warn('CDN principal do Chart.js falhou. Tentando fallback...');
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/chart.js@4.4.3/dist/chart.umd.js';
+      script.onerror = () => console.error('Falha ao carregar Chart.js de ambos os CDNs.');
+      document.head.appendChild(script);
+    }
+  </script>
+
   
 </head>
 <body class="bg-gray-100">

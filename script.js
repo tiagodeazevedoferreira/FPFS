@@ -558,6 +558,13 @@ function displayEstatisticas() {
     return;
   }
 
+  // Verificar se Chart.js está carregado
+  if (typeof Chart === 'undefined') {
+    console.error('Chart.js não está carregado. Verifique o CDN no index.html ou a conexão de rede.');
+    showError('Erro ao carregar o gráfico: Chart.js não está disponível. Verifique a conexão com a internet ou a configuração do CDN.');
+    return;
+  }
+
   const filters = {
     clube: document.getElementById('clube-estatisticas')?.value || '',
     jogador: document.getElementById('jogador-estatisticas')?.value || ''
@@ -807,7 +814,7 @@ async function init() {
     showTab('placar');
   } catch (error) {
     console.error('Erro na inicialização:', error.message);
-    showError(`Erro na inicialização: ${error.message}`);
+    showError(`Erro ao carregar a aplicação: ${error.message}`);
   }
 }
 
