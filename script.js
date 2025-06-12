@@ -10,6 +10,7 @@ let filteredDataClassification = []; // Classificação
 let sortConfigPlacar = { column: 18, direction: 'asc' }; // Default to Index column
 let allDataArtilharia = []; // Dados do nó artilharia
 let golsPorTimeChart = null; // Referência ao gráfico Chart.js
+let golsTomadosChart = null; // Referência ao gráfico de gols tomados
 
 // Função para normalizar strings
 function normalizeString(str) {
@@ -58,7 +59,7 @@ async function fetchFirebaseData(node) {
         'Local', 'Rodada', 'Dia da Semana', 'Gol', 'Assistências', 'Vitória', 'Derrota', 'Empate', 'considerar', 'Index'
       ];
       dataArray.push(headers);
-      const seenRows = new Set(); // Para rastrear linhas únicas
+      const seenRows = new Set();
       Object.entries(data).forEach(([key, row]) => {
         const index = parseInt(key.split('_').pop()) || 0;
         const rowArray = [
@@ -90,7 +91,7 @@ async function fetchFirebaseData(node) {
       const headers = ['Index', 'Posição', 'Time', 'Pontos', 'Jogos', 'Vitórias', 'Empates', 'Derrotas', 'Gols Pró', 'Gols Contra', 'Saldo', 'Aproveitamento'];
       dataArray.push(headers);
       Object.entries(data).forEach(([key, row]) => {
-        if (key === '0') return; // Ignora a chave 0
+        if (key === '0') return;
         const index = parseInt(key.split('_').pop()) || 0;
         const rowArray = [
           index,
@@ -165,12 +166,12 @@ function formatTime(timeStr) {
 function populateFiltersSheet1(dataClassification, dataSheet1, dataArtilharia) {
   console.log('Populando filtros para Placar, Classificação, Artilharia e Estatísticas');
   const filters = [
-    { id: 'time', indices: [4, 7], tab: 'placar' }, // Mandante e Visitante na aba Placar
-    { id: 'time', indices: [2], tab: 'classification' }, // Time na aba Classificação
-    { id: 'clube', indices: [2], tab: 'artilharia' }, // Time na aba Artilharia
-    { id: 'jogador', indices: [1], tab: 'artilharia' }, // Jogador na aba Artilharia
-    { id: 'clube', indices: [2], tab: 'estatisticas' }, // Time na aba Estatísticas
-    { id: 'jogador', indices: [1], tab: 'estatisticas' } // Jogador na aba Estatísticas
+    { id: 'time', indices: [4, 7], tab: 'placar' },
+    { id: 'time', indices: [2], tab: 'classification' },
+    { id: 'clube', indices: [2], tab: 'artilharia' },
+    { id: 'jogador', indices: [1], tab: 'artilharia' },
+    { id: 'clube', indices: [2], tab: 'estatisticas' },
+    { id: 'jogador', indices: [1], tab: 'estatisticas' }
   ];
 
   filters.forEach(filter => {
@@ -437,7 +438,7 @@ function filterDataClassification(data, filters) {
     }
 
     const time = filters.time ? filters.time.trim() : '';
-    const teamName = row[2]; // Coluna 'Time' na classificação
+    const teamName = row[2];
 
     const result = (!time || teamName === time);
     console.log(`Linha ${index + 2}: Time=${teamName}, Filtro Time=${time}, Passou=${result}`);
@@ -463,8 +464,8 @@ function filterDataArtilharia(data, filters) {
 
     const clube = filters.clube ? filters.clube.trim() : '';
     const jogador = filters.jogador ? filters.jogador.trim() : '';
-    const rowTime = row[2]; // Coluna 'Time' na artilharia
-    const rowJogador = row[1]; // Coluna 'Jogador' na artilharia
+    const rowTime = row[2];
+    const rowJogador = row[1];
 
     const result = (
       (!clube || rowTime === clube) &&
@@ -552,13 +553,13 @@ function displayArtilharia() {
 function displayEstatisticas() {
   console.log('Exibindo dados da Estatísticas');
   clearError();
-  const canvas = document.getElementById('golsPorTimeChart');
-  if (!checkElement(canvas, '#golsPorTimeChart')) {
+  const canvasGolsPorTime = document.getElementById('golsPorTimeChart');
+  const canvasGolsTomados = document.getElementById('golsTomadosChart');
+  if (!checkElement(canvasGolsPorTime, '#golsPorTimeChart') || !checkElement(canvasGolsTomados, '#golsTomadosChart')) {
     showError('Erro interno: canvas do gráfico não encontrado.');
     return;
   }
 
-  // Verificar se Chart.js está carregado
   if (typeof Chart === 'undefined') {
     console.error('Chart.js não está carregado. Verifique o CDN no index.html ou a conexão de rede.');
     showError('Erro ao carregar o gráfico: Chart.js não está disponível. Verifique a conexão com a internet ou a configuração do CDN.');
@@ -571,39 +572,75 @@ function displayEstatisticas() {
   };
   console.log('Filtros coletados para Estatísticas:', filters);
 
-  const filteredData = filterDataArtilharia(allDataArtilharia, filters);
-  console.log('Dados filtrados para Estatísticas:', filteredData);
+  const filteredDataArtilharia = filterDataArtilharia(allDataArtilharia, filters);
+  console.log('Dados filtrados para Estatísticas (artilharia):', filteredDataArtilharia);
 
-  // Calcular gols por time
+  // Calcular gols marcados por time
   const golsPorTime = {};
-  filteredData.forEach(row => {
-    const time = row[2]; // Coluna 'Time'
-    const gols = parseInt(row[3]) || 0; // Coluna 'Gols'
+  filteredDataArtilharia.forEach(row => {
+    const time = row[2];
+    const gols = parseInt(row[3]) || 0;
     if (time) {
       golsPorTime[time] = (golsPorTime[time] || 0) + gols;
     }
   });
 
-  // Ordenar times por número de gols em ordem decrescente
-  const sortedTeams = Object.entries(golsPorTime).sort((a, b) => b[1] - a[1]);
-  const labels = sortedTeams.map(([team]) => team);
-  const data = sortedTeams.map(([_, gols]) => gols);
+  // Calcular gols tomados por time
+  const golsTomados = {};
+  allDataSheet1.slice(1).forEach(row => {
+    const mandante = row[4]; // Coluna 'Mandante'
+    const visitante = row[7]; // Coluna 'Visitante'
+    const placar1 = parseInt(row[5]) || 0; // Gols do mandante
+    const placar2 = parseInt(row[6]) || 0; // Gols do visitante
+    if (mandante) {
+      golsTomados[mandante] = (golsTomados[mandante] || 0) + placar2; // Mandante concede placar2
+    }
+    if (visitante) {
+      golsTomados[visitante] = (golsTomados[visitante] || 0) + placar1; // Visitante concede placar1
+    }
+  });
 
-  console.log('Dados para o gráfico (todos os times):', { labels, data });
+  // Aplicar filtro de clube aos gols tomados e gols marcados
+  if (filters.clube) {
+    Object.keys(golsTomados).forEach(team => {
+      if (team !== filters.clube) {
+        delete golsTomados[team];
+      }
+    });
+    Object.keys(golsPorTime).forEach(team => {
+      if (team !== filters.clube) {
+        delete golsPorTime[team];
+      }
+    });
+  }
 
-  // Destruir gráfico existente, se houver
+  // Ordenar times por gols marcados (primeiro gráfico)
+  const sortedTeamsGols = Object.entries(golsPorTime).sort((a, b) => b[1] - a[1]);
+  const labelsGols = sortedTeamsGols.map(([team]) => team);
+  const dataGols = sortedTeamsGols.map(([_, gols]) => gols);
+
+  // Usar a mesma ordem de times para gols tomados (segundo gráfico)
+  const labelsTomados = labelsGols; // Mesma ordem do primeiro gráfico
+  const dataTomados = labelsGols.map(team => golsTomados[team] || 0); // Obter gols tomados ou 0 se não houver
+
+  console.log('Dados para o gráfico (gols marcados):', { labels: labelsGols, data: dataGols });
+  console.log('Dados para o gráfico (gols tomados):', { labels: labelsTomados, data: dataTomados });
+
   if (golsPorTimeChart) {
     golsPorTimeChart.destroy();
   }
+  if (golsTomadosChart) {
+    golsTomadosChart.destroy();
+  }
 
-  // Criar novo gráfico
-  golsPorTimeChart = new Chart(canvas, {
+  // Gráfico de Gols por Time
+  golsPorTimeChart = new Chart(canvasGolsPorTime, {
     type: 'bar',
     data: {
-      labels: labels,
+      labels: labelsGols,
       datasets: [{
         label: 'Gols por Time',
-        data: data,
+        data: dataGols,
         backgroundColor: '#3b82f6',
         borderColor: '#1d4ed8',
         borderWidth: 1
@@ -612,6 +649,11 @@ function displayEstatisticas() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: {
+        padding: {
+          bottom: 80
+        }
+      },
       scales: {
         y: {
           beginAtZero: true,
@@ -632,21 +674,25 @@ function displayEstatisticas() {
             rotation: 90,
             autoSkip: false,
             font: {
-              size: 10 // Alterado para fonte tamanho 10
+              size: 10
             },
-            padding: 10
+            padding: 10,
+            maxRotation: 90,
+            minRotation: 90
+          },
+          grid: {
+            display: false
           }
         }
       },
       plugins: {
         legend: {
-          display: false // Remover legenda
+          display: false
         },
         title: {
           display: true,
-          text: 'Gols por Time' // Novo título
+          text: 'Gols por Time'
         },
-        // Adicionar valores acima das barras
         datalabels: {
           anchor: 'end',
           align: 'top',
@@ -666,9 +712,9 @@ function displayEstatisticas() {
           const meta = chart.getDatasetMeta(datasetIndex);
           meta.data.forEach((bar, index) => {
             const value = dataset.data[index];
-            if (value > 0) { // Exibir apenas se valor for positivo
+            if (value > 0) {
               const x = bar.x;
-              const y = bar.y - 10; // Ajuste vertical
+              const y = bar.y - 10;
               ctx.save();
               ctx.textAlign = 'center';
               ctx.font = '10px Arial';
@@ -682,8 +728,107 @@ function displayEstatisticas() {
     }]
   });
 
-  if (labels.length === 0) {
-    showError('Nenhum dado disponível para o gráfico com os filtros aplicados.');
+  // Gráfico de Gols Tomados por Time
+  golsTomadosChart = new Chart(canvasGolsTomados, {
+    type: 'bar',
+    data: {
+      labels: labelsTomados,
+      datasets: [{
+        label: 'Gols Tomados por Time',
+        data: dataTomados,
+        backgroundColor: '#ef4444',
+        borderColor: '#b91c1c',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: {
+        padding: {
+          bottom: 80
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Gols Tomados'
+          },
+          ticks: {
+            stepSize: 1
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Times'
+          },
+          ticks: {
+            rotation: 90,
+            autoSkip: false,
+            font: {
+              size: 10
+            },
+            padding: 10,
+            maxRotation: 90,
+            minRotation: 90
+          },
+          grid: {
+            display: false
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: false
+        },
+        title: {
+          display: true,
+          text: 'Gols Tomados por Time'
+        },
+        datalabels: {
+          anchor: 'end',
+          align: 'top',
+          offset: 4,
+          font: {
+            size: 10
+          },
+          color: '#000'
+        }
+      }
+    },
+    plugins: [{
+      id: 'customDatalabels',
+      afterDraw: (chart) => {
+        const ctx = chart.ctx;
+        chart.data.datasets.forEach((dataset, datasetIndex) => {
+          const meta = chart.getDatasetMeta(datasetIndex);
+          meta.data.forEach((bar, index) => {
+            const value = dataset.data[index];
+            if (value > 0) {
+              const x = bar.x;
+              const y = bar.y - 10;
+              ctx.save();
+              ctx.textAlign = 'center';
+              ctx.font = '10px Arial';
+              ctx.fillStyle = '#000';
+              ctx.fillText(value, x, y);
+              ctx.restore();
+            }
+          });
+        });
+      }
+    }]
+  });
+
+  if (labelsGols.length === 0 && labelsTomados.length === 0) {
+    showError('Nenhum dado disponível para os gráficos com os filtros aplicados.');
+  } else if (labelsGols.length === 0) {
+    showError('Nenhum dado disponível para o gráfico de Gols por Time com os filtros aplicados.');
+  } else if (labelsTomados.length === 0) {
+    showError('Nenhum dado disponível para o gráfico de Gols Tomados por Time com os filtros aplicados.');
   }
 }
 
@@ -779,7 +924,6 @@ async function init() {
     const aplicarFiltrosEstatisticasBtn = document.getElementById('aplicarFiltros-estatisticas');
     const limparFiltrosEstatisticasBtn = document.getElementById('limparFiltros-estatisticas');
 
-    // Verificação dos botões obrigatórios
     if (!checkElement(classificationBtn, '#classification-btn') ||
         !checkElement(placarBtn, '#placar-btn') ||
         !checkElement(artilhariaBtn, '#artilharia-btn') ||
@@ -845,7 +989,6 @@ async function init() {
       clearFilters('estatisticas');
     });
 
-    // Registrar Service Worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js')
         .then(() => console.log('Service Worker registrado com sucesso'))
