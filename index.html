@@ -60,6 +60,17 @@
     }
   </script>
  <style>
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .filters { margin-bottom: 20px; }
+    .filter-section { display: none; }
+    .filter-section.active { display: block; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th.sortable { cursor: pointer; }
+    .error { color: red; margin-bottom: 10px; }
     canvas { max-height: 400px; margin-bottom: 20px; }
   </style>
   
