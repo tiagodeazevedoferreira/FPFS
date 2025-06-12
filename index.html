@@ -43,16 +43,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jogos da FPFS</title>
-
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="./js/chart.umd.min.js"></script>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link href="style.css" rel="stylesheet">
-
-  <script src="./js/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" integrity="sha256-t2bkeNy3+upX+8i40Xb2bQ2b+5dU+MtRNCTeN4bZ+Zw=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.com/npm/chartjs-plugin-datalabels@2.x.1/dist/chartjs-plugin-datalabels.min.js"></script>
-
   <script>
     // Fallback para outro CDN se o primeiro falhar
     if (typeof Chart === 'undefined') {
@@ -235,9 +231,10 @@
     </details>
    </div>
 
-  <div class="table-container">
-        <canvas id="golsPorTimeChart"></canvas>
-      </div>
+	<div class="table-container">
+      <canvas id="golsPorTimeChart"></canvas>
+      <canvas id="golsTomadosChart"></canvas>
+    </div>
     </div>
   </main>
 
