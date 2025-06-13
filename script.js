@@ -505,40 +505,43 @@ function displayEstatisticas() {
             ]
         },
         options: {
+            indexAxis: 'y', // Define barras horizontais
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: { bottom: 80 } },
+            layout: { padding: { left: 150, right: 30, top: 20, bottom: 20 } }, // Aumentado padding à esquerda
             scales: {
-                y: {
-                    beginAtZero: true,
-                    title: { display: false },
-                    ticks: { stepSize: 1 }
-                },
                 x: {
-                    title: { display: false },
-                    ticks: { 
-                        rotation: 90, 
-                        autoSkip: false, 
-                        font: { size: 10 }, 
-                        padding: 10, 
-                        maxRotation: 90, 
-                        minRotation: 90 
+                    beginAtZero: true,
+                    title: { display: false, text: 'Quantidade de Gols', font: { size: 14 } },
+                    ticks: { stepSize: 1, font: { size: 12 } },
+                    grid: { display: true }
+                },
+                y: {
+                    title: { display: false, text: 'Times', font: { size: 14 } },
+                    ticks: {
+                        font: { size: 12 },
+                        padding: 10,
+                        autoSkip: false,
+                        maxRotation: 0,
+                        minRotation: 0
                     },
                     grid: { display: false }
                 }
             },
             plugins: {
-                legend: { 
-                    display: true, 
+                legend: {
+                    display: true,
                     position: 'top',
                     labels: { font: { size: 12 } }
                 },
-                title: { 
-                    display: true, 
+                title: {
+                    display: false,
                     text: 'Gols Feitos e Tomados por Time',
                     font: { size: 16 }
                 }
-            }
+            },
+            barPercentage: 0.4, // Espaçamento entre barras do mesmo grupo
+            categoryPercentage: 0.8 // Espaçamento entre grupos
         },
         plugins: [{
             id: 'customDatalabels',
@@ -549,11 +552,11 @@ function displayEstatisticas() {
                     meta.data.forEach((bar, index) => {
                         const value = dataset.data[index];
                         if (value > 0) {
-                            const x = bar.x;
-                            const y = bar.y - 10;
+                            const x = bar.x + 10; // Posiciona à direita da barra
+                            const y = bar.y;
                             ctx.save();
-                            ctx.textAlign = 'center';
-                            ctx.font = '10px Arial';
+                            ctx.textAlign = 'left';
+                            ctx.font = '12px Arial';
                             ctx.fillStyle = '#000';
                             ctx.fillText(value, x, y);
                             ctx.restore();
