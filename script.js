@@ -676,4 +676,14 @@ async function init() {
     showTab('placar');
 }
 
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => {
+    init();
+    // Ocultar mensagens indesejadas como "Toque para copiar o URL desse app"
+    const toasts = document.querySelectorAll('div, span, p');
+    toasts.forEach(el => {
+        if (el.textContent.includes('Toque para copiar o URL desse app')) {
+            el.style.display = 'none';
+            console.log('Mensagem "Toque para copiar o URL desse app" ocultada');
+        }
+    });
+});
