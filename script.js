@@ -11,7 +11,6 @@ let golsPorTimeChart = null; // Referência ao gráfico Chart.js
 let golsTomadosChart = null; // Referência ao gráfico de gols tomados
 let timesApelidos = {}; // Mapa de times/clubes para apelidos
 
-// ALTERAÇÃO: Função para formatar strings em Title Case
 function toTitleCase(str) {
     if (!str || typeof str !== 'string') return '';
     return str
@@ -225,7 +224,7 @@ function sortData(data, columnIndex, direction) {
         }
         valueA = valueA.toString().toLowerCase();
         valueB = valueB.toString().toLowerCase();
-        return direction === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueB);
+        return direction === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
     });
     return sortedData;
 }
@@ -505,10 +504,10 @@ function displayEstatisticas() {
             ]
         },
         options: {
-            indexAxis: 'y', // Define barras horizontais
+            indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: { left: 150, right: 30, top: 20, bottom: 20 } }, // Aumentado padding à esquerda
+            layout: { padding: { left: 50, right: 20, top: 20, bottom: 40 } }, // Reduzido left e right
             scales: {
                 x: {
                     beginAtZero: true,
@@ -520,7 +519,7 @@ function displayEstatisticas() {
                     title: { display: false, text: 'Times', font: { size: 14 } },
                     ticks: {
                         font: { size: 12 },
-                        padding: 10,
+                        padding: 5, // Reduzido para aproximar rótulos
                         autoSkip: false,
                         maxRotation: 0,
                         minRotation: 0
@@ -535,13 +534,13 @@ function displayEstatisticas() {
                     labels: { font: { size: 12 } }
                 },
                 title: {
-                    display: false,
+                    display: true,
                     text: 'Gols Feitos e Tomados por Time',
                     font: { size: 16 }
                 }
             },
-            barPercentage: 0.4, // Espaçamento entre barras do mesmo grupo
-            categoryPercentage: 0.8 // Espaçamento entre grupos
+            barPercentage: 0.4,
+            categoryPercentage: 0.8
         },
         plugins: [{
             id: 'customDatalabels',
@@ -552,7 +551,7 @@ function displayEstatisticas() {
                     meta.data.forEach((bar, index) => {
                         const value = dataset.data[index];
                         if (value > 0) {
-                            const x = bar.x + 10; // Posiciona à direita da barra
+                            const x = bar.x + 10;
                             const y = bar.y;
                             ctx.save();
                             ctx.textAlign = 'left';

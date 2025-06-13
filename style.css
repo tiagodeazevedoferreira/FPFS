@@ -264,10 +264,16 @@ th.sort-desc::after {
   }
 
   .chart-container {
-    max-width: 100%;
-    padding: 0.5rem;
-    min-height: 300px;
-  }
+    width: 100%; /* Alterado de max-width: 1000px */
+    min-height: 500px;
+    margin: 1rem auto;
+    padding: 0.5rem; /* Reduzido de 1.5rem */
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
+    box-sizing: border-box; /* Adicionado para incluir padding na largura */
+}
 
   canvas {
     font-size: 8px !important;
