@@ -15,8 +15,8 @@ let timesApelidos = {}; // Mapa de times/clubes para apelidos
 function toTitleCase(str) {
     if (!str || typeof str !== 'string') return '';
     return str
-        .trim()
         .toLowerCase()
+        .trim()
         .split(/\s+/)
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
@@ -51,38 +51,39 @@ async function fetchTimesApelidos() {
         Object.entries(data).forEach(([key, row]) => {
             if (row['Time'] && row['Apelido'] && typeof row['Time'] === 'string' && typeof row['Apelido'] === 'string') {
                 apelidosMap[row['Time']] = row['Apelido'];
-                console.log(`Mapeado: ${row['Time']} -> ${row['Apelido']}`);
+                console.log(`Mapeado: ${key}: ${row['Time']} -> ${row['Apelido']}`);
             } else {
                 console.warn(`Entrada inválida em times_apelidos (chave ${key}):`, row);
             }
         });
         localStorage.setItem(cacheKey, JSON.stringify(apelidosMap));
-        localStorage.setItem(`${cacheKey}_time`, Date.now());
+        localStorage.setItem(`${cacheKey}_time}`, Date.now());
         console.log('Mapa de times_apelidos:', apelidosMap);
+        timesApelidos = apelidosMap;
         return apelidosMap;
     } catch (error) {
         console.error('Erro ao buscar times_apelidos:', error.message);
-        showError(`Erro ao carregar times_apelidos: ${error.message}. Usando nomes originais.`);
+        showError(`Erro ao carregar times_apelidos: ${error.message}`);
         return {};
     }
 }
 
 async function fetchFirebaseData(node) {
     const url = `${FIREBASE_URL}${node}.json?cacheBuster=${Date.now()}`;
-    console.log(`Iniciando requisição ao Firebase para ${node}:`, url);
+    console.log(`Fetching data for node: ${node}:`, url);
     try {
         const response = await fetch(url, { mode: 'cors', cache: 'no-cache' });
         if (!response.ok) throw new Error(`Erro ${response.status}`);
         const data = await response.json();
-        if (!data || Object.keys(data).length === 0) throw new Error(`Nó ${node} vazio ou não existe.`);
+        if (!data || Object.keys(data).length === 0) throw new Error(`Nó ${node} vazio ou não existe`);
         let dataArray = [];
         if (node === 'jogos') {
-            const headers = ['Campeonato', 'Data', 'Horário', 'Ginásio', 'Mandante', 'Placar 1', 'Placar 2', 'Visitante', 'Local', 'Rodada', 'Dia da Semana', 'Gol', 'Assistências', 'Vitória', 'Derrota', 'Empate', 'considerar', 'Index'];
+            const headers = ['Campeonato', 'Data', 'Horário', 'Ginásio', 'Mandante', 'Placar 1', 'Placar 2', '', 'Visitante', 'Local', 'Rodada', 'Dia da Série', 'Gol', 'Assistências', 'Vitória', 'Derrota', 'Empate', 'considerar', 'Index'];
             dataArray.push(headers);
             const seenRows = new Set();
             Object.entries(data).forEach(([key, row]) => {
                 if (!row['Mandante'] || !row['Visitante'] || !row['Data']) {
-                    console.warn(`Linha inválida (chave ${key}):`, row);
+                    console.warn(`Linha inválida: (chave ${key}):`, row);
                     return;
                 }
                 const index = parseInt(key.split('_').pop()) || 0;
@@ -227,7 +228,7 @@ function sortData(data, columnIndex, direction) {
         }
         valueA = valueA.toString().toLowerCase();
         valueB = valueB.toString().toLowerCase();
-        return direction === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueB);
+        return direction === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
     });
     return sortedData;
 }
@@ -253,7 +254,7 @@ function displayData(data, filteredData, page) {
         th.className = 'p-2 sortable';
         th.dataset.index = columnIndices[idx];
         if (sortConfigPlacar.column === columnIndices[idx]) {
-            th.classList.add(sortConfigPlacar.direction === 'asc' ? 'asc-' : 'desc-asc');
+            th.classList.add(sortConfigPlacar.direction === 'asc' ? 'sort-asc' : 'sort-desc');
         }
         th.addEventListener('click', () => {
             const newDirection = sortConfigPlacar.column === columnIndices[idx] && sortConfigPlacar.direction === 'asc' ? 'desc' : 'asc';
@@ -261,7 +262,7 @@ function displayData(data, filteredData, page) {
             sortConfigPlacar.direction = newDirection;
             const sortedData = sortData(filteredData, columnIndices[idx], newDirection);
             displayData(data, sortedData, page);
-            console.log(`Ordenando por coluna ${text} (${columnIndices[idx]}) em ${newDirection}`);
+            console.log(`Ordenando por coluna ${text} (${columnIndices[idx]}) ${newDirection}`);
         });
         trHead.appendChild(th);
     });
@@ -284,18 +285,18 @@ function displayData(data, filteredData, page) {
 function displayClassification() {
     console.log('Exibindo dados da Classificação');
     clearError();
-    const tbody = document.getElementById('classificationBody');
-    const thead = document.getElementById('tableHead-classification');
+    const tbody = document.querySelector('#classificationBody');
+    const thead = document.querySelector('#tableHead-classification');
     if (!checkElement(tbody, '#classificationBody') || !checkElement(thead, '#tableHead-classification')) {
         showError('Erro interno: tabela não encontrada.');
         return;
     }
     tbody.innerHTML = '';
     thead.innerHTML = '';
-    const filters = { time: document.getElementById('time-classification')?.value || '' };
+    const filters = { time: document.querySelector('#time-classification')?.value || '' };
     const filteredData = filterDataClassification(allDataClassification, filters);
     const trHead = document.createElement('tr');
-    trHead.className = 'bg-gray-200';
+    trHead.className = 'class-header-row';
     const headers = ['Posição', 'Time', 'Pontos', 'Jogos', 'Vitórias', 'Empates', 'Derrotas', 'Gols Pró', 'Gols Contra', 'Saldo', 'Aproveitamento'];
     headers.forEach(text => {
         const th = document.createElement('th');
@@ -310,7 +311,7 @@ function displayClassification() {
     filteredData.forEach(row => {
         const tr = document.createElement('tr');
         row.slice(1).forEach(cell => {
-            const td = document.createElement('td');
+            const td = td document.createElement('td');
             td.textContent = cell || '';
             td.className = 'p-2 border';
             tr.appendChild(td);
@@ -319,80 +320,78 @@ function displayClassification() {
     });
 }
 
-function filterDataSheet1(data, filters) {
+function filterDataSheet1(data, filters)) {
     console.log('Aplicando filtros para placar:', filters);
-    const today = new Date('2025-06-13');
+    const today = new Date('2025-06-30');
     today.setHours(0, 0, 0, 0);
     let filteredRows = data.slice(1).filter((row, index) => {
-        if (!row || row.length < 18) {
-            console.log(`Linha ${index + 2} inválida:`, row);
+        if (!row || row.length < 18)) {
+            console.log(`Linha ${index + 2} inválida:`), row);
             return false;
         }
-        const dataStr = row[1];
+        const dataStr = row[1'];
         let dataJogo = null;
         try {
-            if (dataStr) {
-                if (dataStr.includes('/')) {
-                    const [day, month, year] = dataStr.split('/');
-                    if (day && month && year && year.length === 4) {
-                        dataJogo = new Date(`${year}-${month}-${day}`);
-                    }
-                } else {
-                    dataJogo = new Date(dataStr);
+            if (dataStr && dataStr.includes('/')) {
+                const [day, month, year] = dataStr.split('/'));
+                if (day && month && year && year.length === 4)) {
+                    dataJogo = new Date(`${year}-${month}-${day}`);
                 }
-                if (isNaN(dataJogo.getTime())) {
-                    console.log(`Data inválida na linha ${index + 2}:`, dataStr);
-                    return false;
-                }
-                dataJogo.setHours(0, 0, 0, 0);
+            } else {
+                dataJogo = new Date(dataStr);
             }
+            if (isNaN(dataJogo.getTime())) {
+                console.log(`Data inválida na linha ${index + 2}:`, dataStr));
+                return false;
+            }
+            dataJogo.setHours(0, 0, 0, 0);
         } catch (error) {
-            console.log(`Erro ao parsear data na linha ${index + 2}:`, dataStr, error);
+            console.log(`Erro ao parsear data na linha ${index + 2}:`, dataStr, error));
             return false;
         }
         if (dataJogo && dataJogo > today) {
-            console.log(`Linha ${index + 2} ignorada (data futura): ${dataStr}`);
+            console.log(`Linha ${index + 2} ignorada (data futura):`, dataStr));
             return false;
         }
         const dataInicio = filters.dataInicio ? new Date(filters.dataInicio) : null;
         const dataFim = filters.dataFim ? new Date(filters.dataFim) : null;
         const time = filters.time ? filters.time.trim() : '';
         return (
-            (!dataInicio || (dataJogo && dataJogo >= dataInicio)) &&
-            (!dataFim || (dataJogo && dataJogo <= dataFim)) &&
+            (!dataInicio || (dataJogo && dataJogo >= dataInicio))) &&
+            (!dataFim || (dataJogo && dataJogo <= dataFim))) &&
             (!time || row[4] === time || row[7] === time)
         );
-    }).sort((a, b) => (parseInt(a[17]) || 0) - (parseInt(b[17]) || 0));
-    console.log('Dados filtrados e ordenados por Index:', filteredRows);
+    }).sort((a, b) => (parseInt(a[17]) || (0) - (parseInt(b[17])) || 0));
+    console.log('Dados filtrados e ordenados por Index:', filteredRows));
     return filteredRows;
 }
 
-function filterDataClassification(data, filters) {
-    console.log('Aplicando filtros para classificação:', filters);
+function filterDataClassification(data, datafilters) {
+    console.log('Aplicando filtros para classificação:', filters));
     let filteredRows = data.slice(1).filter((row, index) => {
-        if (!row || row.length < 12) {
-            console.log(`Linha ${index + 2} inválida:`, row);
+        if (!row || row.length < 12)) {
+            console.log(`Linha ${index + 2} inválida:`), row);
             return false;
         }
         const time = filters.time ? filters.time.trim() : '';
         return !time || row[2] === time;
-    }).sort((a, b) => (parseInt(a[0]) || 0) - (parseInt(b[0]) || 0));
-    console.log('Dados filtrados e ordenados por Index:', filteredRows);
+    }).sort((a, b) => (parseInt(a[0]) || 0) - (parseInt(b[0])) || 0));
+    console.log('Dados filtrados e ordenados por Index:', filteredRows));
     return filteredRows;
 }
 
-function filterDataArtilharia(data, filters) {
-    console.log('Aplicando filtros para artilharia:', filters);
+function filterDataArtilharia(data, filterfilters) {
+    console.log('Aplicando filtros para artilharia:', filters));
     let filteredRows = data.slice(1).filter((row, index) => {
-        if (!row || row.length < 4) {
-            console.log(`Linha ${index + 2} inválida:`, row);
+        if (!row || row.length < 4)) {
+            console.log(`Linha ${index + 2} inválida:`), row);
             return false;
         }
-        const clube = filters.clube ? filters.clube.trim() : '';
+        const clube = filters.clube ? filters.clubre.trim() : '';
         const jogador = filters.jogador ? filters.jogador.trim() : '';
-        return (!clube || row[2] === clube) && (!jogador || row[1] === jogador);
-    }).sort((a, b) => (parseInt(a[0]) || 0) - (parseInt(b[0]) || 0));
-    console.log('Dados filtrados e ordenados por Index:', filteredRows);
+        return (!clube || row[2] === clube) && (!jogador || row[1] === jogador));
+    }).sort((a, b) => (parseInt(a[0]) || 0) - (parseInt(b[0])) || 0));
+    console.log('Dados filtrados e ordenados por Index:', filteredRows));
     return filteredRows;
 }
 
@@ -500,10 +499,10 @@ function displayEstatisticas() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: { bottom: 0 } },
+            layout: { padding: { bottom: 0 } }, // ALTERAÇÃO: Remove padding inferior
             scales: {
                 y: { beginAtZero: true, title: { display: false }, ticks: { stepSize: 1 } },
-                x: { title: { display: false  }, ticks: { rotation: 90, autoSkip: false, font: { size: 10 }, padding: 10, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
+                x: { title: { display: false }, ticks: { rotation: 90, autoSkip: false, font: { size: 10 }, padding: 10, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
             },
             plugins: { legend: { display: false }, title: { display: false, text: 'Gols feitos' } }
         },
@@ -517,7 +516,7 @@ function displayEstatisticas() {
                         const value = dataset.data[index];
                         if (value > 0) {
                             const x = bar.x;
-                            const y = bar.y - 10;
+                            const y = bar.y - 5; // ALTERAÇÃO: Reduz a distância dos datalabels
                             ctx.save();
                             ctx.textAlign = 'center';
                             ctx.font = '10px Arial';
@@ -545,10 +544,10 @@ function displayEstatisticas() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: { bottom: 0 } },
+            layout: { padding: { bottom: 0 } }, // ALTERAÇÃO: Remove padding inferior
             scales: {
                 y: { beginAtZero: true, title: { display: false }, ticks: { stepSize: 1 } },
-                x: { title: { display: false}, ticks: { display: true , rotation: 90, autoSkip: false, font: { size: 10 }, padding: 10, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
+                x: { title: { display: false }, ticks: { display: false, rotation: 90, autoSkip: false, font: { size: 10 }, padding: 10, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
             },
             plugins: { legend: { display: false }, title: { display: false, text: 'Gols Tomados' } }
         },
@@ -562,7 +561,7 @@ function displayEstatisticas() {
                         const value = dataset.data[index];
                         if (value > 0) {
                             const x = bar.x;
-                            const y = bar.y - 10;
+                            const y = bar.y - 5; // ALTERAÇÃO: Reduz a distância dos datalabels
                             ctx.save();
                             ctx.textAlign = 'center';
                             ctx.font = '10px Arial';
