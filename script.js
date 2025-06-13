@@ -548,7 +548,7 @@ function displayEstatisticas() {
             layout: { padding: { bottom: 0 } },
             scales: {
                 y: { beginAtZero: true, title: { display: false }, ticks: { stepSize: 1 } },
-                x: { title: { display: false}, ticks: { display: false , rotation: 90, autoSkip: false, font: { size: 10 }, padding: 10, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
+                x: { title: { display: false}, ticks: { display: true , rotation: 90, autoSkip: false, font: { size: 10 }, padding: 10, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
             },
             plugins: { legend: { display: false }, title: { display: false, text: 'Gols Tomados' } }
         },
