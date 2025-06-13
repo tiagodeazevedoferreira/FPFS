@@ -34,6 +34,7 @@ body {
   transform: translateY(-1px);
 }
 
+
 .tab-button.active-tab {
   background-color: #1d4ed8;
 }
@@ -56,14 +57,17 @@ body {
 }
 
 .table-container {
-  overflow-x: auto;
-  width: 100%;
-  max-width: 100%;
-  position: relative;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: #3b82f6 #f2f2f2;
-  margin: 0;
+    width: 100%;
+    height: auto; /* Permite crescimento dinâmico */
+    min-height: 200px; /* Fallback para poucos dados */
+    margin: 1rem auto;
+    padding: 0; /* Sem margens internas */
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
+    box-sizing: border-box;
+    position: relative; /* Para canvas responsivo */
 }
 
 .table-container::-webkit-scrollbar {
@@ -82,6 +86,11 @@ body {
 
 .table-container::-webkit-scrollbar-thumb:hover {
   background: #2563eb;
+}
+
+.table-container canvas {
+    width: 100% !important; /* Garante que o canvas ocupe toda a largura */
+    height: 100% !important; /* Garante que o canvas siga a altura do container */
 }
 
 #artilharia .table-container {
@@ -116,16 +125,16 @@ td {
 }
 
 tr:nth-child(even) {
-  background-color: #d1fae5;
+  background-color: #d1fae5; /* Verde vibrante */
 }
 
 tr:hover {
-  background-color: #e0f2fe;
+  background-color: #e0f2fe; /* Azul claro no hover */
 }
 
 th {
   white-space: nowrap;
-  background-color: #f43f5e;
+  background-color: #f43f5e; /* Rosa vibrante */
   color: white;
 }
 
@@ -146,10 +155,9 @@ th {
 }
 
 .chart-container {
-  max-width: 800px;
-  min-height: 400px;
+  max-width: 600px;
   margin: 1rem auto;
-  padding: 1.5rem;
+  padding: 1rem;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -264,18 +272,7 @@ th.sort-desc::after {
   }
 
   .chart-container {
-    width: 100%; /* Alterado de max-width: 1000px */
-    min-height: 500px;
-    margin: 1rem auto;
-    padding: 0.5rem; /* Reduzido de 1.5rem */
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    overflow-x: auto;
-    box-sizing: border-box; /* Adicionado para incluir padding na largura */
-}
-
-  canvas {
-    font-size: 8px !important;
+    max-width: 100%;
+    padding: 0.5rem;
   }
 }

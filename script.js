@@ -507,7 +507,7 @@ function displayEstatisticas() {
             indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: { left: 50, right: 20, top: 20, bottom: 40 } }, // Reduzido left e right
+            layout: { padding: { left: 1, right: 1, top: 1, bottom: 1 } }, // Reduzido top e bottom
             scales: {
                 x: {
                     beginAtZero: true,
@@ -519,7 +519,7 @@ function displayEstatisticas() {
                     title: { display: false, text: 'Times', font: { size: 14 } },
                     ticks: {
                         font: { size: 12 },
-                        padding: 5, // Reduzido para aproximar rótulos
+                        padding: 5,
                         autoSkip: false,
                         maxRotation: 0,
                         minRotation: 0
@@ -531,12 +531,12 @@ function displayEstatisticas() {
                 legend: {
                     display: true,
                     position: 'bottom',
-                    labels: { font: { size: 12 } }
+                    labels: { font: { size: 10 } } // Reduzido tamanho da fonte
                 },
                 title: {
                     display: true,
                     text: 'Gols Feitos e Tomados por Time',
-                    font: { size: 16 }
+                    font: { size: 14 } // Reduzido tamanho da fonte
                 }
             },
             barPercentage: 0.4,
