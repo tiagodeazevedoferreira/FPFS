@@ -490,7 +490,7 @@ function displayEstatisticas() {
         data: {
             labels: labelsGols,
             datasets: [{
-                label: 'Gols por Time',
+                label: 'Gols feitos',
                 data: dataGols,
                 backgroundColor: '#3b82f6',
                 borderColor: '#1d4ed8',
@@ -502,10 +502,10 @@ function displayEstatisticas() {
             maintainAspectRatio: false,
             layout: { padding: { bottom: 80 } },
             scales: {
-                y: { beginAtZero: true, title: { display: true, text: 'Gols' }, ticks: { stepSize: 1 } },
-                x: { title: { display: true, text: 'Times' }, ticks: { rotation: 90, autoSkip: false, font: { size: 10 }, padding: 10, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
+                y: { beginAtZero: true, title: { display: true }, ticks: { stepSize: 1 } },
+                x: { title: { display: false  }, ticks: { rotation: 90, autoSkip: false, font: { size: 10 }, padding: 10, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
             },
-            plugins: { legend: { display: false }, title: { display: true, text: 'Gols por Time' } }
+            plugins: { legend: { display: false }, title: { display: true, text: 'Gols feitos' } }
         },
         plugins: [{
             id: 'customDatalabels',
@@ -535,7 +535,7 @@ function displayEstatisticas() {
         data: {
             labels: labelsTomados,
             datasets: [{
-                label: 'Gols Tomados por Time',
+                label: 'Gols Tomados',
                 data: dataTomados,
                 backgroundColor: '#ef4444',
                 borderColor: '#b91c1c',
@@ -547,10 +547,10 @@ function displayEstatisticas() {
             maintainAspectRatio: false,
             layout: { padding: { bottom: 80 } },
             scales: {
-                y: { beginAtZero: true, title: { display: true, text: 'Gols Tomados' }, ticks: { stepSize: 1 } },
-                x: { title: { display: true, text: 'Times' }, ticks: { rotation: 90, autoSkip: false, font: { size: 10 }, padding: 10, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
+                y: { beginAtZero: true, title: { display: true }, ticks: { stepSize: 1 } },
+                x: { title: { display: false}, ticks: { rotation: 90, autoSkip: false, font: { size: 10 }, padding: 10, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
             },
-            plugins: { legend: { display: false }, title: { display: true, text: 'Gols Tomados por Time' } }
+            plugins: { legend: { display: false }, title: { display: true, text: 'Gols Tomados' } }
         },
         plugins: [{
             id: 'customDatalabels',
