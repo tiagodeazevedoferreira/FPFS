@@ -11,6 +11,7 @@ let golsPorTimeChart = null; // Referência ao gráfico Chart.js
 let golsTomadosChart = null; // Referência ao gráfico de gols tomados
 let timesApelidos = {}; // Mapa de times/clubes para apelidos
 
+// ALTERAÇÃO: Função para formatar strings em Title Case
 function toTitleCase(str) {
     if (!str || typeof str !== 'string') return '';
     return str
@@ -87,6 +88,7 @@ async function fetchFirebaseData(node) {
                 const index = parseInt(key.split('_').pop()) || 0;
                 const mandante = timesApelidos[row['Mandante']] || row['Mandante'];
                 const visitante = timesApelidos[row['Visitante']] || row['Visitante'];
+                // ALTERAÇÃO: Formatar o campo Ginásio em Title Case
                 const ginásio = toTitleCase(row['Ginásio'] || '');
                 console.log(`Jogos - Mandante: ${row['Mandante']} -> ${mandante}, Visitante: ${row['Visitante']} -> ${visitante}, Ginásio: ${row['Ginásio']} -> ${ginásio}`);
                 const rowArray = [
@@ -129,6 +131,7 @@ async function fetchFirebaseData(node) {
                 }
                 const index = parseInt(key.split('_').pop()) || 0;
                 const clube = timesApelidos[row['2']] || row['2'];
+                // ALTERAÇÃO: Formatar o campo Jogador em Title Case
                 const jogador = toTitleCase(row['1'] || '');
                 console.log(`Artilharia - Clube: ${row['2']} -> ${clube}, Jogador: ${row['1']} -> ${jogador}`);
                 dataArray.push([index, jogador, clube, row['3'] || '']);
@@ -224,7 +227,7 @@ function sortData(data, columnIndex, direction) {
         }
         valueA = valueA.toString().toLowerCase();
         valueB = valueB.toString().toLowerCase();
-        return direction === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+        return direction === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueB);
     });
     return sortedData;
 }
@@ -437,8 +440,9 @@ function displayArtilharia() {
 function displayEstatisticas() {
     console.log('Exibindo dados da Estatísticas');
     clearError();
-    const canvasGols = document.getElementById('golsChart');
-    if (!checkElement(canvasGols, '#golsChart')) {
+    const canvasGolsPorTime = document.getElementById('golsPorTimeChart');
+    const canvasGolsTomados = document.getElementById('golsTomadosChart');
+    if (!checkElement(canvasGolsPorTime, '#golsPorTimeChart') || !checkElement(canvasGolsTomados, '#golsTomadosChart')) {
         showError('Erro interno: canvas do gráfico não encontrado.');
         return;
     }
@@ -475,72 +479,33 @@ function displayEstatisticas() {
         });
     }
     const sortedTeamsGols = Object.entries(golsPorTime).sort((a, b) => b[1] - a[1]);
-    const labels = sortedTeamsGols.map(([team]) => team);
+    const labelsGols = sortedTeamsGols.map(([team]) => team);
     const dataGols = sortedTeamsGols.map(([_, gols]) => gols);
-    const dataTomados = labels.map(team => golsTomados[team] || 0);
-
+    const labelsTomados = labelsGols;
+    const dataTomados = labelsGols.map(team => golsTomados[team] || 0);
     if (golsPorTimeChart) golsPorTimeChart.destroy();
     if (golsTomadosChart) golsTomadosChart.destroy();
-
-    golsPorTimeChart = new Chart(canvasGols, {
+    golsPorTimeChart = new Chart(canvasGolsPorTime, {
         type: 'bar',
         data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Gols Feitos',
-                    data: dataGols,
-                    backgroundColor: '#3b82f6',
-                    borderColor: '#1d4ed8',
-                    borderWidth: 1
-                },
-                {
-                    label: 'Gols Tomados',
-                    data: dataTomados,
-                    backgroundColor: '#ef4444',
-                    borderColor: '#b91c1c',
-                    borderWidth: 1
-                }
-            ]
+            labels: labelsGols,
+            datasets: [{
+                label: 'Gols feitos',
+                data: dataGols,
+                backgroundColor: '#3b82f6',
+                borderColor: '#1d4ed8',
+                borderWidth: 1
+            }]
         },
         options: {
-            indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: { left: 1, right: 1, top: 1, bottom: 1 } }, // Reduzido top e bottom
+            layout: { padding: { bottom: 80 } },
             scales: {
-                x: {
-                    beginAtZero: true,
-                    title: { display: false, text: 'Quantidade de Gols', font: { size: 14 } },
-                    ticks: { stepSize: 1, font: { size: 12 } },
-                    grid: { display: true }
-                },
-                y: {
-                    title: { display: false, text: 'Times', font: { size: 14 } },
-                    ticks: {
-                        font: { size: 12 },
-                        padding: 5,
-                        autoSkip: false,
-                        maxRotation: 0,
-                        minRotation: 0
-                    },
-                    grid: { display: false }
-                }
+                y: { beginAtZero: true, title: { display: false }, ticks: { stepSize: 1 } },
+                x: { title: { display: false  }, ticks: { rotation: 90, autoSkip: false, font: { size: 10 }, padding: 10, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
             },
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'bottom',
-                    labels: { font: { size: 10 } } // Reduzido tamanho da fonte
-                },
-                title: {
-                    display: true,
-                    text: 'Gols Feitos e Tomados por Time',
-                    font: { size: 14 } // Reduzido tamanho da fonte
-                }
-            },
-            barPercentage: 0.4,
-            categoryPercentage: 0.8
+            plugins: { legend: { display: false }, title: { display: false, text: 'Gols feitos' } }
         },
         plugins: [{
             id: 'customDatalabels',
@@ -551,11 +516,11 @@ function displayEstatisticas() {
                     meta.data.forEach((bar, index) => {
                         const value = dataset.data[index];
                         if (value > 0) {
-                            const x = bar.x + 10;
-                            const y = bar.y;
+                            const x = bar.x;
+                            const y = bar.y - 10;
                             ctx.save();
-                            ctx.textAlign = 'left';
-                            ctx.font = '12px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.font = '10px Arial';
                             ctx.fillStyle = '#000';
                             ctx.fillText(value, x, y);
                             ctx.restore();
@@ -565,9 +530,53 @@ function displayEstatisticas() {
             }
         }]
     });
-
-    if (labels.length === 0) {
-        showError('Nenhum dado disponível para o gráfico.');
+    golsTomadosChart = new Chart(canvasGolsTomados, {
+        type: 'bar',
+        data: {
+            labels: labelsTomados,
+            datasets: [{
+                label: 'Gols Tomados',
+                data: dataTomados,
+                backgroundColor: '#ef4444',
+                borderColor: '#b91c1c',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: { padding: { bottom: 80 } },
+            scales: {
+                y: { beginAtZero: true, title: { display: false }, ticks: { stepSize: 1 } },
+                x: { title: { display: false}, ticks: { display: false , rotation: 90, autoSkip: false, font: { size: 10 }, padding: 10, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
+            },
+            plugins: { legend: { display: false }, title: { display: false, text: 'Gols Tomados' } }
+        },
+        plugins: [{
+            id: 'customDatalabels',
+            afterDraw: (chart) => {
+                const ctx = chart.ctx;
+                chart.data.datasets.forEach((dataset, datasetIndex) => {
+                    const meta = chart.getDatasetMeta(datasetIndex);
+                    meta.data.forEach((bar, index) => {
+                        const value = dataset.data[index];
+                        if (value > 0) {
+                            const x = bar.x;
+                            const y = bar.y - 10;
+                            ctx.save();
+                            ctx.textAlign = 'center';
+                            ctx.font = '10px Arial';
+                            ctx.fillStyle = '#000';
+                            ctx.fillText(value, x, y);
+                            ctx.restore();
+                        }
+                    });
+                });
+            }
+        }]
+    });
+    if (labelsGols.length === 0 && labelsTomados.length === 0) {
+        showError('Nenhum dado disponível para os gráficos.');
     }
 }
 
@@ -667,29 +676,4 @@ async function init() {
     showTab('placar');
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    init();
-    const toasts = document.querySelectorAll('div, span, p');
-    let messageFound = false;
-    toasts.forEach(el => {
-        if (el.textContent.includes('Toque para copiar o URL desse app')) {
-            el.style.display = 'none';
-            messageFound = true;
-            console.log('Mensagem "Toque para copiar o URL desse app" ocultada');
-        }
-    });
-    if (!messageFound) {
-        console.log('Mensagem "Toque para copiar o URL desse app" não encontrada no DOM');
-    }
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach(mutation => {
-            mutation.addedNodes.forEach(node => {
-                if (node.nodeType === Node.ELEMENT_NODE && node.textContent.includes('Toque para copiar o URL desse app')) {
-                    node.style.display = 'none';
-                    console.log('Mensagem dinâmica "Toque para copiar o URL desse app" ocultada');
-                }
-            });
-        });
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-});
+document.addEventListener('DOMContentLoaded', init);

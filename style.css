@@ -34,7 +34,6 @@ body {
   transform: translateY(-1px);
 }
 
-
 .tab-button.active-tab {
   background-color: #1d4ed8;
 }
@@ -57,17 +56,14 @@ body {
 }
 
 .table-container {
-    width: 100%;
-    height: auto; /* Permite crescimento dinâmico */
-    min-height: 200px; /* Fallback para poucos dados */
-    margin: 1rem auto;
-    padding: 0; /* Sem margens internas */
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    overflow-x: auto;
-    box-sizing: border-box;
-    position: relative; /* Para canvas responsivo */
+  overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #3b82f6 #f2f2f2;
+  margin: 0;
 }
 
 .table-container::-webkit-scrollbar {
@@ -86,11 +82,6 @@ body {
 
 .table-container::-webkit-scrollbar-thumb:hover {
   background: #2563eb;
-}
-
-.table-container canvas {
-    width: 100% !important; /* Garante que o canvas ocupe toda a largura */
-    height: 100% !important; /* Garante que o canvas siga a altura do container */
 }
 
 #artilharia .table-container {
@@ -275,4 +266,12 @@ th.sort-desc::after {
     max-width: 100%;
     padding: 0.5rem;
   }
+}
+
+/* ALTERAÇÃO: Reduzir espaço entre os gráficos na aba Estatísticas */
+#estatisticas .chart-container + .chart-container {
+    margin-top: 0 !important;
+}
+#estatisticas .chart-container:first-child {
+    margin-bottom: 0 !important;
 }
