@@ -502,7 +502,7 @@ function displayEstatisticas() {
             maintainAspectRatio: false,
             layout: { padding: { bottom: 80 } },
             scales: {
-                y: { beginAtZero: true, title: { display: true }, ticks: { stepSize: 1 } },
+                y: { beginAtZero: true, title: { display: false }, ticks: { stepSize: 1 } },
                 x: { title: { display: false  }, ticks: { rotation: 90, autoSkip: false, font: { size: 10 }, padding: 10, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
             },
             plugins: { legend: { display: false }, title: { display: true, text: 'Gols feitos' } }
@@ -547,7 +547,7 @@ function displayEstatisticas() {
             maintainAspectRatio: false,
             layout: { padding: { bottom: 80 } },
             scales: {
-                y: { beginAtZero: true, title: { display: true }, ticks: { stepSize: 1 } },
+                y: { beginAtZero: true, title: { display: false }, ticks: { stepSize: 1 } },
                 x: { title: { display: false}, ticks: { rotation: 90, autoSkip: false, font: { size: 10 }, padding: 10, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
             },
             plugins: { legend: { display: false }, title: { display: true, text: 'Gols Tomados' } }
