@@ -11,6 +11,17 @@ let golsPorTimeChart = null; // Referência ao gráfico Chart.js
 let golsTomadosChart = null; // Referência ao gráfico de gols tomados
 let timesApelidos = {}; // Mapa de times/clubes para apelidos
 
+// ALTERAÇÃO: Função para formatar strings em Title Case
+function toTitleCase(str) {
+    if (!str || typeof str !== 'string') return '';
+    return str
+        .trim()
+        .toLowerCase()
+        .split(/\s+/)
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+}
+
 function normalizeString(str) {
     if (!str || typeof str !== 'string') return '';
     return str.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ');
@@ -77,9 +88,11 @@ async function fetchFirebaseData(node) {
                 const index = parseInt(key.split('_').pop()) || 0;
                 const mandante = timesApelidos[row['Mandante']] || row['Mandante'];
                 const visitante = timesApelidos[row['Visitante']] || row['Visitante'];
-                console.log(`Jogos - Mandante: ${row['Mandante']} -> ${mandante}, Visitante: ${row['Visitante']} -> ${visitante}`);
+                // ALTERAÇÃO: Formatar o campo Ginásio em Title Case
+                const ginásio = toTitleCase(row['Ginásio'] || '');
+                console.log(`Jogos - Mandante: ${row['Mandante']} -> ${mandante}, Visitante: ${row['Visitante']} -> ${visitante}, Ginásio: ${row['Ginásio']} -> ${ginásio}`);
                 const rowArray = [
-                    'FPFS Sub-9 2025', row['Data'] || '', row['Horário'] || '', row['Ginásio'] || '',
+                    'FPFS Sub-9 2025', row['Data'] || '', row['Horário'] || '', ginásio,
                     mandante, row['Placar 1'] || '', row['Placar 2'] || '', visitante,
                     '', '', '', '', '',
                     row['Placar 1'] && row['Placar 2'] ? (parseInt(row['Placar 1']) > parseInt(row['Placar 2']) ? '1' : '0') : '',
@@ -118,8 +131,10 @@ async function fetchFirebaseData(node) {
                 }
                 const index = parseInt(key.split('_').pop()) || 0;
                 const clube = timesApelidos[row['2']] || row['2'];
-                console.log(`Artilharia - Clube: ${row['2']} -> ${clube}`);
-                dataArray.push([index, row['1'] || '', clube, row['3'] || '']);
+                // ALTERAÇÃO: Formatar o campo Jogador em Title Case
+                const jogador = toTitleCase(row['1'] || '');
+                console.log(`Artilharia - Clube: ${row['2']} -> ${clube}, Jogador: ${row['1']} -> ${jogador}`);
+                dataArray.push([index, jogador, clube, row['3'] || '']);
             });
         }
         console.log(`Dados convertidos para ${node}:`, dataArray);
@@ -212,7 +227,7 @@ function sortData(data, columnIndex, direction) {
         }
         valueA = valueA.toString().toLowerCase();
         valueB = valueB.toString().toLowerCase();
-        return direction === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+        return direction === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueB);
     });
     return sortedData;
 }
