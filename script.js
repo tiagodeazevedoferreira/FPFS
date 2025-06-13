@@ -88,7 +88,6 @@ async function fetchFirebaseData(node) {
                 const index = parseInt(key.split('_').pop()) || 0;
                 const mandante = timesApelidos[row['Mandante']] || row['Mandante'];
                 const visitante = timesApelidos[row['Visitante']] || row['Visitante'];
-                // ALTERAÇÃO: Formatar o campo Ginásio em Title Case
                 const ginásio = toTitleCase(row['Ginásio'] || '');
                 console.log(`Jogos - Mandante: ${row['Mandante']} -> ${mandante}, Visitante: ${row['Visitante']} -> ${visitante}, Ginásio: ${row['Ginásio']} -> ${ginásio}`);
                 const rowArray = [
@@ -131,7 +130,6 @@ async function fetchFirebaseData(node) {
                 }
                 const index = parseInt(key.split('_').pop()) || 0;
                 const clube = timesApelidos[row['2']] || row['2'];
-                // ALTERAÇÃO: Formatar o campo Jogador em Title Case
                 const jogador = toTitleCase(row['1'] || '');
                 console.log(`Artilharia - Clube: ${row['2']} -> ${clube}, Jogador: ${row['1']} -> ${jogador}`);
                 dataArray.push([index, jogador, clube, row['3'] || '']);
@@ -440,9 +438,8 @@ function displayArtilharia() {
 function displayEstatisticas() {
     console.log('Exibindo dados da Estatísticas');
     clearError();
-    const canvasGolsPorTime = document.getElementById('golsPorTimeChart');
-    const canvasGolsTomados = document.getElementById('golsTomadosChart');
-    if (!checkElement(canvasGolsPorTime, '#golsPorTimeChart') || !checkElement(canvasGolsTomados, '#golsTomadosChart')) {
+    const canvasGols = document.getElementById('golsChart');
+    if (!checkElement(canvasGols, '#golsChart')) {
         showError('Erro interno: canvas do gráfico não encontrado.');
         return;
     }
@@ -479,33 +476,69 @@ function displayEstatisticas() {
         });
     }
     const sortedTeamsGols = Object.entries(golsPorTime).sort((a, b) => b[1] - a[1]);
-    const labelsGols = sortedTeamsGols.map(([team]) => team);
+    const labels = sortedTeamsGols.map(([team]) => team);
     const dataGols = sortedTeamsGols.map(([_, gols]) => gols);
-    const labelsTomados = labelsGols;
-    const dataTomados = labelsGols.map(team => golsTomados[team] || 0);
+    const dataTomados = labels.map(team => golsTomados[team] || 0);
+
     if (golsPorTimeChart) golsPorTimeChart.destroy();
     if (golsTomadosChart) golsTomadosChart.destroy();
-    golsPorTimeChart = new Chart(canvasGolsPorTime, {
+
+    golsPorTimeChart = new Chart(canvasGols, {
         type: 'bar',
         data: {
-            labels: labelsGols,
-            datasets: [{
-                label: 'Gols feitos',
-                data: dataGols,
-                backgroundColor: '#3b82f6',
-                borderColor: '#1d4ed8',
-                borderWidth: 1
-            }]
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Gols Feitos',
+                    data: dataGols,
+                    backgroundColor: '#3b82f6',
+                    borderColor: '#1d4ed8',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Gols Tomados',
+                    data: dataTomados,
+                    backgroundColor: '#ef4444',
+                    borderColor: '#b91c1c',
+                    borderWidth: 1
+                }
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             layout: { padding: { bottom: 80 } },
             scales: {
-                y: { beginAtZero: true, title: { display: false }, ticks: { stepSize: 1 } },
-                x: { title: { display: false  }, ticks: { rotation: 90, autoSkip: false, font: { size: 10 }, padding: 10, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
+                y: {
+                    beginAtZero: true,
+                    title: { display: false },
+                    ticks: { stepSize: 1 }
+                },
+                x: {
+                    title: { display: false },
+                    ticks: { 
+                        rotation: 90, 
+                        autoSkip: false, 
+                        font: { size: 10 }, 
+                        padding: 10, 
+                        maxRotation: 90, 
+                        minRotation: 90 
+                    },
+                    grid: { display: false }
+                }
             },
-            plugins: { legend: { display: false }, title: { display: true, text: 'Gols feitos' } }
+            plugins: {
+                legend: { 
+                    display: true, 
+                    position: 'top',
+                    labels: { font: { size: 12 } }
+                },
+                title: { 
+                    display: true, 
+                    text: 'Gols Feitos e Tomados por Time',
+                    font: { size: 16 }
+                }
+            }
         },
         plugins: [{
             id: 'customDatalabels',
@@ -530,53 +563,9 @@ function displayEstatisticas() {
             }
         }]
     });
-    golsTomadosChart = new Chart(canvasGolsTomados, {
-        type: 'bar',
-        data: {
-            labels: labelsTomados,
-            datasets: [{
-                label: 'Gols Tomados',
-                data: dataTomados,
-                backgroundColor: '#ef4444',
-                borderColor: '#b91c1c',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: { padding: { bottom: 80 } },
-            scales: {
-                y: { beginAtZero: true, title: { display: false }, ticks: { stepSize: 1 } },
-                x: { title: { display: false}, ticks: { rotation: 90, autoSkip: false, font: { size: 10 }, padding: 10, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
-            },
-            plugins: { legend: { display: false }, title: { display: true, text: 'Gols Tomados' } }
-        },
-        plugins: [{
-            id: 'customDatalabels',
-            afterDraw: (chart) => {
-                const ctx = chart.ctx;
-                chart.data.datasets.forEach((dataset, datasetIndex) => {
-                    const meta = chart.getDatasetMeta(datasetIndex);
-                    meta.data.forEach((bar, index) => {
-                        const value = dataset.data[index];
-                        if (value > 0) {
-                            const x = bar.x;
-                            const y = bar.y - 10;
-                            ctx.save();
-                            ctx.textAlign = 'center';
-                            ctx.font = '10px Arial';
-                            ctx.fillStyle = '#000';
-                            ctx.fillText(value, x, y);
-                            ctx.restore();
-                        }
-                    });
-                });
-            }
-        }]
-    });
-    if (labelsGols.length === 0 && labelsTomados.length === 0) {
-        showError('Nenhum dado disponível para os gráficos.');
+
+    if (labels.length === 0) {
+        showError('Nenhum dado disponível para o gráfico.');
     }
 }
 
@@ -678,12 +667,27 @@ async function init() {
 
 document.addEventListener('DOMContentLoaded', () => {
     init();
-    // Ocultar mensagens indesejadas como "Toque para copiar o URL desse app"
     const toasts = document.querySelectorAll('div, span, p');
+    let messageFound = false;
     toasts.forEach(el => {
         if (el.textContent.includes('Toque para copiar o URL desse app')) {
             el.style.display = 'none';
+            messageFound = true;
             console.log('Mensagem "Toque para copiar o URL desse app" ocultada');
         }
     });
+    if (!messageFound) {
+        console.log('Mensagem "Toque para copiar o URL desse app" não encontrada no DOM');
+    }
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach(mutation => {
+            mutation.addedNodes.forEach(node => {
+                if (node.nodeType === Node.ELEMENT_NODE && node.textContent.includes('Toque para copiar o URL desse app')) {
+                    node.style.display = 'none';
+                    console.log('Mensagem dinâmica "Toque para copiar o URL desse app" ocultada');
+                }
+            });
+        });
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
 });
