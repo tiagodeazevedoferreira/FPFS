@@ -268,17 +268,19 @@ th.sort-desc::after {
   }
 }
 
-/* ALTERAÇÃO: Reduzir espaço entre os gráficos na aba Estatísticas */
+/* ALTERAÇÃO: Aproximar gráficos na aba Estatísticas, permitindo sobreposição */
 #estatisticas .chart-container {
-    padding-top: 0.5rem; /* Reduz padding superior */
-    padding-bottom: 0.5rem; /* Reduz padding inferior */
-    margin: 0 auto !important; /* Remove margens verticais completamente */
+    padding-top: 0 !important; /* Remove padding superior */
+    padding-bottom: 0 !important; /* Remove padding inferior */
+    margin: 0 auto !important; /* Remove margens verticais */
+    box-shadow: none !important; /* Remove sombra para evitar separação visual */
 }
 
 #estatisticas .chart-container + .chart-container {
-    margin-top: 0 !important;
+    margin-top: -10px !important; /* Margem negativa para sobreposição */
     border-top-left-radius: 0 !important; /* Remove arredondamento superior */
     border-top-right-radius: 0 !important;
+    background-color: transparent !important; /* Fundo transparente para sobreposição */
 }
 
 #estatisticas .chart-container:first-child {
