@@ -275,4 +275,36 @@ th.sort-desc::after {
     margin: 0 auto !important;
 }
 
-#estatisticas .chart
+#estatisticas .chart-container + .chart-container {
+    margin-top: 0 !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+}
+
+#estatisticas .chart-container:first-child {
+    margin-bottom: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+/* Estilos para a aba Estatísticas 2 */
+#estatisticas2 .chart-container {
+    padding: 1rem;
+    margin: 1rem auto !important;
+    border-radius: 8px !important;
+    height: 400px; /* Altura padrão em telas maiores */
+}
+
+@media (max-width: 768px) {
+    #estatisticas2 .chart-container {
+        height: calc(100vh - 112px - 48px - 48px - 64px - 32px); /* 100vh - header - nav - footer - filters - margins/paddings */
+        max-height: none;
+        margin: 0.5rem auto !important;
+        padding: 0.5rem;
+    }
+
+    #estatisticas2 .chart-container canvas {
+        height: 100% !important;
+        width: 100% !important;
+    }
+}
