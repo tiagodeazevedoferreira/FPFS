@@ -293,4 +293,12 @@ th.sort-desc::after {
     padding-bottom: 0.5rem;
     margin: 0 auto !important;
     border-radius: 8px !important;
+    max-width: 800px;
+    height: 1600px; /* Aumenta a altura 4x (400px × 4) */
+}
+
+@media (max-width: 768px) {
+    #estatisticas2 .chart-container {
+        height: calc(100vh - 112px - 48px - 48px - 64px); /* Máximo da tela, menos elementos fixos */
+    }
 }
