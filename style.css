@@ -268,37 +268,21 @@ th.sort-desc::after {
   }
 }
 
-/* Estilos para a aba Estatísticas */
+/* ALTERAÇÃO: Reduzir espaço entre os gráficos na aba Estatísticas */
 #estatisticas .chart-container {
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-    margin: 0 auto !important;
+    padding-top: 0.5rem; /* Reduz padding superior */
+    padding-bottom: 0.5rem; /* Reduz padding inferior */
+    margin: 0 auto !important; /* Remove margens verticais completamente */
 }
 
 #estatisticas .chart-container + .chart-container {
     margin-top: 0 !important;
-    border-top-left-radius: 0 !important;
+    border-top-left-radius: 0 !important; /* Remove arredondamento superior */
     border-top-right-radius: 0 !important;
 }
 
 #estatisticas .chart-container:first-child {
     margin-bottom: 0 !important;
-    border-bottom-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important; /* Remove arredondamento inferior */
     border-bottom-right-radius: 0 !important;
-}
-
-/* Estilos para a aba Estatísticas 2 */
-#estatisticas2 .chart-container {
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-    margin: 0 auto !important;
-    border-radius: 8px !important;
-    max-width: 800px;
-    height: 1600px; /* Aumenta a altura 4x (400px × 4) */
-}
-
-@media (max-width: 768px) {
-    #estatisticas2 .chart-container {
-        height: calc(100vh - 112px - 48px - 48px - 64px); /* Máximo da tela, menos elementos fixos */
-    }
 }

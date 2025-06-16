@@ -677,7 +677,7 @@ function displayEstatisticas2() {
                 }
             },
             plugins: { 
-                legend: { display: true, position: 'bottom' }, 
+                legend: { display: true, position: 'top' }, 
                 title: { display: false } 
             }
         },
