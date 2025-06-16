@@ -268,21 +268,11 @@ th.sort-desc::after {
   }
 }
 
-/* ALTERAÇÃO: Reduzir espaço entre os gráficos na aba Estatísticas */
+/* Estilos para a aba Estatísticas */
 #estatisticas .chart-container {
-    padding-top: 0.5rem; /* Reduz padding superior */
-    padding-bottom: 0.5rem; /* Reduz padding inferior */
-    margin: 0 auto !important; /* Remove margens verticais completamente */
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    margin: 0 auto !important;
 }
 
-#estatisticas .chart-container + .chart-container {
-    margin-top: 0 !important;
-    border-top-left-radius: 0 !important; /* Remove arredondamento superior */
-    border-top-right-radius: 0 !important;
-}
-
-#estatisticas .chart-container:first-child {
-    margin-bottom: 0 !important;
-    border-bottom-left-radius: 0 !important; /* Remove arredondamento inferior */
-    border-bottom-right-radius: 0 !important;
-}
+#estatisticas .chart

@@ -9,6 +9,7 @@ let sortConfigPlacar = { column: 18, direction: 'asc' }; // Default to Index col
 let allDataArtilharia = []; // Dados do nó artilharia
 let golsPorTimeChart = null; // Referência ao gráfico Chart.js
 let golsTomadosChart = null; // Referência ao gráfico de gols tomados
+let golsChart2 = null; // Referência ao gráfico combinado (Estatísticas 2)
 let timesApelidos = {}; // Mapa de times/clubes para apelidos
 
 // ALTERAÇÃO: Função para formatar strings em Title Case
@@ -186,7 +187,9 @@ function populateFilters() {
         { id: 'clube', indices: [2], tab: 'artilharia' },
         { id: 'jogador', indices: [1], tab: 'artilharia' },
         { id: 'clube', indices: [2], tab: 'estatisticas' },
-        { id: 'jogador', indices: [1], tab: 'estatisticas' }
+        { id: 'jogador', indices: [1], tab: 'estatisticas' },
+        { id: 'clube', indices: [2], tab: 'estatisticas2' },
+        { id: 'jogador', indices: [1], tab: 'estatisticas2' }
     ];
     filters.forEach(filter => {
         const select = document.getElementById(`${filter.id}-${filter.tab}`);
@@ -503,7 +506,7 @@ function displayEstatisticas() {
             layout: { padding: { bottom: 0 } },
             scales: {
                 y: { beginAtZero: true, title: { display: false }, ticks: { stepSize: 1 } },
-                x: { title: { display: false  }, ticks: { rotation: 90, autoSkip: false, font: { size: 10 }, padding: 10, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
+                x: { title: { display: false }, ticks: { rotation: 90, autoSkip: false, font: { size: 10 }, padding: 10, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
             },
             plugins: { legend: { display: false }, title: { display: false, text: 'Gols feitos' } }
         },
@@ -548,7 +551,7 @@ function displayEstatisticas() {
             layout: { padding: { bottom: 0 } },
             scales: {
                 y: { beginAtZero: true, title: { display: false }, ticks: { stepSize: 1 } },
-                x: { title: { display: false}, ticks: { display: true , rotation: 90, autoSkip: false, font: { size: 10 }, padding: 10, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
+                x: { title: { display: false }, ticks: { display: true, rotation: 90, autoSkip: false, font: { size: 10 }, padding: 10, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
             },
             plugins: { legend: { display: false }, title: { display: false, text: 'Gols Tomados' } }
         },
@@ -577,6 +580,132 @@ function displayEstatisticas() {
     });
     if (labelsGols.length === 0 && labelsTomados.length === 0) {
         showError('Nenhum dado disponível para os gráficos.');
+    }
+}
+
+function displayEstatisticas2() {
+    console.log('Exibindo dados da Estatísticas 2');
+    clearError();
+    const canvasGolsChart = document.getElementById('golsChart2');
+    if (!checkElement(canvasGolsChart, '#golsChart2')) {
+        showError('Erro interno: canvas do gráfico não encontrado.');
+        return;
+    }
+    if (typeof Chart === 'undefined') {
+        showError('Erro ao carregar o gráfico: Chart.js não está disponível.');
+        return;
+    }
+    const filters = {
+        clube: document.getElementById('clube-estatisticas2')?.value || '',
+        jogador: document.getElementById('jogador-estatisticas2')?.value || ''
+    };
+    const filteredDataArtilharia = filterDataArtilharia(allDataArtilharia, filters);
+    const golsPorTime = {};
+    filteredDataArtilharia.forEach(row => {
+        const time = row[2];
+        const gols = parseInt(row[3]) || 0;
+        if (time) golsPorTime[time] = (golsPorTime[time] || 0) + gols;
+    });
+    const golsTomados = {};
+    allDataSheet1.slice(1).forEach(row => {
+        const mandante = row[4];
+        const visitante = row[7];
+        const placar1 = parseInt(row[5]) || 0;
+        const placar2 = parseInt(row[6]) || 0;
+        if (mandante) golsTomados[mandante] = (golsTomados[mandante] || 0) + placar2;
+        if (visitante) golsTomados[visitante] = (golsTomados[visitante] || 0) + placar1;
+    });
+    if (filters.clube) {
+        Object.keys(golsTomados).forEach(team => {
+            if (team !== filters.clube) delete golsTomados[team];
+        });
+        Object.keys(golsPorTime).forEach(team => {
+            if (team !== filters.clube) delete golsPorTime[team];
+        });
+    }
+    const sortedTeamsGols = Object.entries(golsPorTime).sort((a, b) => b[1] - a[1]);
+    const labels = sortedTeamsGols.map(([team]) => team);
+    const dataGols = sortedTeamsGols.map(([_, gols]) => gols);
+    const dataTomados = labels.map(team => golsTomados[team] || 0);
+    if (golsChart2) golsChart2.destroy();
+    golsChart2 = new Chart(canvasGolsChart, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Gols Feitos',
+                    data: dataGols,
+                    backgroundColor: '#3b82f6',
+                    borderColor: '#1d4ed8',
+                    borderWidth: 1,
+                    barPercentage: 0.45,
+                    categoryPercentage: 0.5
+                },
+                {
+                    label: 'Gols Tomados',
+                    data: dataTomados,
+                    backgroundColor: '#ef4444',
+                    borderColor: '#b91c1c',
+                    borderWidth: 1,
+                    barPercentage: 0.45,
+                    categoryPercentage: 0.5
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: { padding: { bottom: 0 } },
+            scales: {
+                y: { 
+                    beginAtZero: true, 
+                    title: { display: false }, 
+                    ticks: { stepSize: 1 } 
+                },
+                x: { 
+                    title: { display: false }, 
+                    ticks: { 
+                        rotation: 90, 
+                        autoSkip: false, 
+                        font: { size: 10 }, 
+                        padding: 10, 
+                        maxRotation: 90, 
+                        minRotation: 90 
+                    }, 
+                    grid: { display: false } 
+                }
+            },
+            plugins: { 
+                legend: { display: true, position: 'top' }, 
+                title: { display: false } 
+            }
+        },
+        plugins: [{
+            id: 'customDatalabels',
+            afterDraw: (chart) => {
+                const ctx = chart.ctx;
+                chart.data.datasets.forEach((dataset, datasetIndex) => {
+                    const meta = chart.getDatasetMeta(datasetIndex);
+                    meta.data.forEach((bar, index) => {
+                        const value = dataset.data[index];
+                        if (value > 0) {
+                            const x = bar.x;
+                            const y = bar.y - 10;
+                            ctx.save();
+                            ctx.textAlign = 'center';
+                            ctx.font = '10px Arial';
+                            ctx.fillStyle = '#000';
+                            ctx.fillText(value, x, y);
+                            ctx.restore();
+                        }
+                    });
+                });
+            }
+        }]
+    });
+    if (labels.length === 0) {
+        showError('Nenhum dado disponível para o gráfico.');
     }
 }
 
@@ -620,6 +749,12 @@ function clearFilters(tabId) {
             if (el) el.value = '';
         });
         displayEstatisticas();
+    } else if (tabId === 'estatisticas2') {
+        ['clube-estatisticas2', 'jogador-estatisticas2'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        displayEstatisticas2();
     }
 }
 
@@ -635,6 +770,7 @@ function showTab(tabId) {
     else if (tabId === 'placar') displayPlacar();
     else if (tabId === 'artilharia') displayArtilharia();
     else if (tabId === 'estatisticas') displayEstatisticas();
+    else if (tabId === 'estatisticas2') displayEstatisticas2();
 }
 
 async function init() {
@@ -665,6 +801,8 @@ async function init() {
     document.getElementById('limparFiltros-artilharia').addEventListener('click', () => clearFilters('artilharia'));
     document.getElementById('aplicarFiltros-estatisticas').addEventListener('click', displayEstatisticas);
     document.getElementById('limparFiltros-estatisticas').addEventListener('click', () => clearFilters('estatisticas'));
+    document.getElementById('aplicarFiltros-estatisticas2').addEventListener('click', displayEstatisticas2);
+    document.getElementById('limparFiltros-estatisticas2').addEventListener('click', () => clearFilters('estatisticas2'));
     if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
         try {
             await navigator.serviceWorker.register('sw.js');
