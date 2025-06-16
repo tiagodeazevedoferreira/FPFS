@@ -289,22 +289,8 @@ th.sort-desc::after {
 
 /* Estilos para a aba Estatísticas 2 */
 #estatisticas2 .chart-container {
-    padding: 1rem;
-    margin: 1rem auto !important;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    margin: 0 auto !important;
     border-radius: 8px !important;
-    height: 400px; /* Altura padrão em telas maiores */
-}
-
-@media (max-width: 768px) {
-    #estatisticas2 .chart-container {
-        height: calc(100vh - 112px - 48px - 48px - 64px - 32px); /* 100vh - header - nav - footer - filters - margins/paddings */
-        max-height: none;
-        margin: 0.5rem auto !important;
-        padding: 0.5rem;
-    }
-
-    #estatisticas2 .chart-container canvas {
-        height: 100% !important;
-        width: 100% !important;
-    }
 }
