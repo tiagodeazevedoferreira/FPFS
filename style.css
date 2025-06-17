@@ -272,23 +272,26 @@ th.sort-desc::after {
 #estatisticas2 .charts-container {
   display: flex;
   flex-wrap: nowrap; /* Impede quebra de linha */
-  gap: 1rem;
-  justify-content: center;
-  overflow-x: auto; /* Permite rolagem horizontal em telas pequenas */
+  gap: 0; /* Remove espaçamento entre os gráficos */
+  justify-content: flex-start; /* Alinha à esquerda */
+  overflow-x: auto; /* Permite rolagem horizontal */
   padding: 0.5rem;
-  -webkit-overflow-scrolling: touch; /* Suaviza rolagem em iOS */
+  -webkit-overflow-scrolling: touch;
 }
 
 #estatisticas2 .chart-container {
-  flex: 1;
-  min-width: 250px; /* Reduzido para telas menores */
-  max-width: 400px; /* Limite para evitar gráficos muito largos */
-  margin: 0.5rem 0;
-  padding: 0.5rem;
-  min-height: 350px; /* Altura ajustada para gráficos horizontais */
+  flex: 0 0 auto; /* Evita expansão desnecessária */
+  min-width: 280px; /* Ajustado para gráficos menores */
+  max-width: 320px; /* Limite para consistência */
+  margin: 0; /* Remove margens */
+  padding: 0.5rem; /* Padding mínimo */
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Ajuste para gráficos horizontais */
 #estatisticas2 .chart-container canvas {
-  height: 300px !important; /* Altura reduzida para telas menores */
+  width: 100% !important;
+  height: 300px !important; /* Altura fixa para visibilidade */
+  margin: 0 !important;
 }

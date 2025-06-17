@@ -109,7 +109,7 @@ async function fetchFirebaseData(node) {
                 }
             });
         } else if (node === 'classificacao') {
-            const headers = ['Index', 'Posição', 'Time', 'Pontos', 'Jogos', 'Vitórias', 'Empates', 'Derrotas', 'Gols Pró', 'Gols Contra', 'Saldo', 'Aproveitamento'];
+            const headers = ['Index', 'Posição', 'Time', 'Pontos', 'Jogos', 'Vitórias', 'Empates', 'Derrotas', 'Gols Próprio', 'Gols Contra', 'Saldo', 'Aproveitamento'];
             dataArray.push(headers);
             Object.entries(data).forEach(([key, row]) => {
                 if (key === '0' || !row['2']) {
@@ -228,7 +228,7 @@ function sortData(data, columnIndex, direction) {
         }
         valueA = valueA.toString().toLowerCase();
         valueB = valueB.toString().toLowerCase();
-        return direction === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueB);
+        return direction === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
     });
     return sortedData;
 }
@@ -254,7 +254,7 @@ function displayData(data, filteredData, page) {
         th.className = 'p-2 sortable';
         th.dataset.index = columnIndices[idx];
         if (sortConfigPlacar.column === columnIndices[idx]) {
-            th.classList.add(sortConfigPlacar.direction === 'asc' ? 'asc-' : 'desc-asc');
+            th.classList.add(sortConfigPlacar.direction === 'asc' ? 'sort-asc' : 'sort-desc');
         }
         th.addEventListener('click', () => {
             const newDirection = sortConfigPlacar.column === columnIndices[idx] && sortConfigPlacar.direction === 'asc' ? 'desc' : 'asc';
@@ -297,7 +297,7 @@ function displayClassification() {
     const filteredData = filterDataClassification(allDataClassification, filters);
     const trHead = document.createElement('tr');
     trHead.className = 'bg-gray-200';
-    const headers = ['Posição', 'Time', 'Pontos', 'Jogos', 'Vitórias', 'Empates', 'Derrotas', 'Gols Pró', 'Gols Contra', 'Saldo', 'Aproveitamento'];
+    const headers = ['Posição', 'Time', 'Pontos', 'Jogos', 'Vitórias', 'Empates', 'Derrotas', 'Gols Próprio', 'Gols Contra', 'Saldo', 'Aproveitamento'];
     headers.forEach(text => {
         const th = document.createElement('th');
         th.textContent = text;
@@ -491,7 +491,7 @@ function displayEstatisticas() {
         data: {
             labels: labelsGols,
             datasets: [{
-                label: 'Gols feitos',
+                label: 'Gols Feitos',
                 data: dataGols,
                 backgroundColor: '#3b82f6',
                 borderColor: '#1d4ed8',
@@ -506,7 +506,7 @@ function displayEstatisticas() {
                 y: { beginAtZero: true, title: { display: false }, ticks: { stepSize: 1 } },
                 x: { title: { display: false }, ticks: { rotation: 90, autoSkip: false, font: { size: 10 }, padding: 10, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
             },
-            plugins: { legend: { display: false }, title: { display: false, text: 'Gols feitos' } }
+            plugins: { legend: { display: false }, title: { display: false, text: 'Gols Feitos' } }
         },
         plugins: [{
             id: 'customDatalabels',
@@ -627,126 +627,159 @@ function displayEstatisticas2() {
     const dataGols = sortedTeamsGols.map(([_, gols]) => gols);
     const labelsTomados = labelsGols;
     const dataTomados = labelsGols.map(team => golsTomados[team] || 0);
-    if (golsPorTimeChart2) golsPorTimeChart2.destroy();
-    if (golsTomadosChart2) golsTomadosChart2.destroy();
-    golsPorTimeChart2 = new Chart(canvasGolsPorTime, {
-        type: 'bar',
-        data: {
-            labels: labelsGols,
-            datasets: [{
-                label: 'Gols Feitos',
-                data: dataGols,
-                backgroundColor: '#3b82f6',
-                borderColor: '#1d4ed8',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            indexAxis: 'y', // Barras horizontais
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: { padding: { left: 10, right: 10 } },
-            scales: {
-                x: { 
-                    beginAtZero: true, 
-                    title: { display: false }, 
-                    ticks: { stepSize: 1, font: { size: 10 } },
-                    grid: { display: true }
-                },
-                y: { 
-                    title: { display: false }, 
-                    ticks: { font: { size: 10 }, padding: 5 },
-                    grid: { display: false }
-                }
-            },
-            plugins: { 
-                legend: { display: false }, 
-                title: { display: false, text: 'Gols Feitos' }
-            }
-        },
-        plugins: [{
-            id: 'customDatalabels',
-            afterDraw: (chart) => {
-                const ctx = chart.ctx;
-                chart.data.datasets.forEach((dataset, datasetIndex) => {
-                    const meta = chart.getDatasetMeta(datasetIndex);
-                    meta.data.forEach((bar, index) => {
-                        const value = dataset.data[index];
-                        if (value > 0) {
-                            const x = bar.x + 10; // Ajuste para barras horizontais
-                            const y = bar.y;
-                            ctx.save();
-                            ctx.textAlign = 'left';
-                            ctx.font = '10px Arial';
-                            ctx.fillStyle = '#000';
-                            ctx.fillText(value, x, y);
-                            ctx.restore();
-                        }
-                    });
-                });
-            }
-        }]
-    });
-    golsTomadosChart2 = new Chart(canvasGolsTomados, {
-        type: 'bar',
-        data: {
-            labels: labelsTomados,
-            datasets: [{
-                label: 'Gols Tomados',
-                data: dataTomados,
-                backgroundColor: '#ef4444',
-                borderColor: '#b91c1c',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            indexAxis: 'y', // Barras horizontais
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: { padding: { left: 10, right: 10 } },
-            scales: {
-                x: { 
-                    beginAtZero: true, 
-                    title: { display: false }, 
-                    ticks: { stepSize: 1, font: { size: 10 } },
-                    grid: { display: true }
-                },
-                y: { 
-                    title: { display: false }, 
-                    ticks: { font: { size: 10 }, padding: 5 },
-                    grid: { display: false }
-                }
-            },
-            plugins: { 
-                legend: { display: false }, 
-                title: { display: false, text: 'Gols Tomados' }
-            }
-        },
-        plugins: [{
-            id: 'customDatalabels',
-            afterDraw: (chart) => {
-                const ctx = chart.ctx;
-                chart.data.datasets.forEach((dataset, datasetIndex) => {
-                    const meta = chart.getDatasetMeta(datasetIndex);
-                    meta.data.forEach((bar, index) => {
-                        const value = dataset.data[index];
-                        if (value > 0) {
-                            const x = bar.x + 10; // Ajuste para barras horizontais
-                            const y = bar.y;
-                            ctx.save();
-                            ctx.textAlign = 'left';
-                            ctx.font = '10px Arial';
-                            ctx.fillStyle = '#000';
-                            ctx.fillText(value, x, y);
-                            ctx.restore();
-                        }
-                    });
-                });
-            }
-        }]
-    });
+    if (golsPorTimeChart2) {
+        console.log('Destruindo gráfico anterior: golsPorTimeChart2');
+        golsPorTimeChart2.destroy();
+    }
+    if (golsTomadosChart2) {
+        console.log('Destruindo gráfico anterior: golsTomadosChart2');
+        golsTomadosChart2.destroy();
+    }
     if (labelsGols.length === 0 && labelsTomados.length === 0) {
         showError('Nenhum dado disponível para os gráficos.');
+        return;
+    }
+    try {
+        golsPorTimeChart2 = new Chart(canvasGolsPorTime, {
+            type: 'bar',
+            data: {
+                labels: labelsGols,
+                datasets: [{
+                    label: 'Gols Feitos',
+                    data: dataGols,
+                    backgroundColor: '#3b82f6',
+                    borderColor: '#1d4ed8',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y', // Barras horizontais
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: { padding: { left: 10, right: 10, top: 10, bottom: 10 } },
+                scales: {
+                    x: { 
+                        beginAtZero: true, 
+                        title: { display: false }, 
+                        ticks: { 
+                            stepSize: 1, 
+                            font: { size: 10 }, 
+                            rotation: 0, // Eixo X horizontal
+                            maxRotation: 0 
+                        },
+                        grid: { display: true }
+                    },
+                    y: { 
+                        title: { display: false }, 
+                        ticks: { 
+                            font: { size: 10 }, 
+                            padding: 5, 
+                            autoSkip: false, // Mostra todos os times
+                            maxTicksLimit: undefined 
+                        },
+                        grid: { display: false }
+                    }
+                },
+                plugins: { 
+                    legend: { display: false }, 
+                    title: { display: false, text: 'Gols Feitos' }
+                }
+            },
+            plugins: [{
+                id: 'customDatalabels',
+                afterDraw: (chart) => {
+                    const ctx = chart.ctx;
+                    chart.data.datasets.forEach((dataset, datasetIndex) => {
+                        const meta = chart.getDatasetMeta(datasetIndex);
+                        meta.data.forEach((bar, index) => {
+                            const value = dataset.data[index];
+                            if (value > 0) {
+                                const x = bar.x + 10;
+                                const y = bar.y;
+                                ctx.save();
+                                ctx.textAlign = 'left';
+                                ctx.font = '10px Arial';
+                                ctx.fillStyle = '#000';
+                                ctx.fillText(value, x, y);
+                                ctx.restore();
+                            }
+                        });
+                    });
+                }
+            }]
+        });
+        console.log('Gráfico Gols Feitos criado com sucesso');
+    } catch (error) {
+        console.error('Erro ao criar gráfico Gols Feitos:', error);
+        showError('Erro ao renderizar o gráfico de Gols Feitos.');
+    }
+    try {
+        golsTomadosChart2 = new Chart(canvasGolsTomados, {
+            type: 'bar',
+            data: {
+                labels: labelsTomados,
+                datasets: [{
+                    label: 'Gols Tomados',
+                    data: dataTomados,
+                    backgroundColor: '#ef4444',
+                    borderColor: '#b91c1c',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y', // Barras horizontais
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: { padding: { left: 0, right: 10, top: 10, bottom: 10 } }, // Sem padding à esquerda
+                scales: {
+                    x: { 
+                        beginAtZero: true, 
+                        title: { display: false }, 
+                        ticks: { 
+                            stepSize: 1, 
+                            font: { size: 10 }, 
+                            rotation: 0, // Eixo X horizontal
+                            maxRotation: 0 
+                        },
+                        grid: { display: true },
+                        offset: false // Colar barras na borda
+                    },
+                    y: { 
+                        display: false // Oculta eixo Y
+                    }
+                },
+                plugins: { 
+                    legend: { display: false }, 
+                    title: { display: false, text: 'Gols Tomados' }
+                }
+            },
+            plugins: [{
+                id: 'customDatalabels',
+                afterDraw: (chart) => {
+                    const ctx = chart.ctx;
+                    chart.data.datasets.forEach((dataset, datasetIndex) => {
+                        const meta = chart.getDatasetMeta(datasetIndex);
+                        meta.data.forEach((bar, index) => {
+                            const value = dataset.data[index];
+                            if (value > 0) {
+                                const x = bar.x + 10;
+                                const y = bar.y;
+                                ctx.save();
+                                ctx.textAlign = 'left';
+                                ctx.font = '10px Arial';
+                                ctx.fillStyle = '#000';
+                                ctx.fillText(value, x, y);
+                                ctx.restore();
+                            }
+                        });
+                    });
+                }
+            }]
+        });
+        console.log('Gráfico Gols Tomados criado com sucesso');
+    } catch (error) {
+        console.error('Erro ao criar gráfico Gols Tomados:', error);
+        showError('Erro ao renderizar o gráfico de Gols Tomados.');
     }
 }
 
