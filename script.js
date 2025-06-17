@@ -494,16 +494,18 @@ function displayEstatisticas() {
                 data: dataGols,
                 backgroundColor: '#3b82f6',
                 borderColor: '#1d4ed8',
-                borderWidth: 1
+                borderWidth: 0,
+				barPercentage: 0.9, // ALTERAÇÃO: Aumenta a largura da barra dentro da categoria
+				categoryPercentage: 0.8
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: { bottom: 0 } },
+            layout: { padding: { bottom: 0, top: 25 , left: 0, right: 0} },
             scales: {
                 y: { beginAtZero: true, title: { display: false }, ticks: { stepSize: 1 } },
-                x: { title: { display: false }, ticks: { rotation: 90, autoSkip: false, font: { size: 10 }, padding: 10, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
+                x: { title: { display: false }, ticks: { rotation: 90, autoSkip: false, font: { size: 10 }, padding: 0, maxRotation: 90, minRotation: 90 }, grid: { display: false }  , position: 'left'}
             },
             plugins: { legend: { display: false }, title: { display: false, text: 'Gols feitos' } }
         },
@@ -545,7 +547,7 @@ function displayEstatisticas() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: { bottom: 0 } },
+            layout: { padding: { bottom: 0, top: 25 , left: 0, right: 0} },
             scales: {
                 y: { beginAtZero: true, title: { display: false }, ticks: { stepSize: 1 } },
                 x: { title: { display: false }, ticks: { display: true, rotation: 90, autoSkip: false, font: { size: 10 }, padding: 10, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
@@ -584,11 +586,11 @@ function displayEstatisticas2() {
     console.log('Exibindo dados da Estatísticas 2');
     clearError();
     const canvasGolsChart = document.getElementById('canvasGolsChart');
-    if (!checkElement(canvasGolsChart, '#canvasGolsChart')) {
+    if (!checkElement(canvasGolsChart, '#canvasGolsChart')) { // ALTERAÇÃO: Corrigido checkElement para canvasGolsChart
         showError('Erro interno: canvas do gráfico não encontrado.');
         return;
     }
-    if (typeof Chart === 'undefined') {
+    if (typeof Chart === 'undefined') { // ALTERAÇÃO: Corrigido verificação para Chart em vez de window
         showError('Erro ao carregar o gráfico: Chart.js não está disponível.');
         return;
     }
@@ -599,56 +601,54 @@ function displayEstatisticas2() {
     const golsPorTime = {};
     filteredDataArtilharia.forEach(row => {
         const time = row[2];
-        const gols = parseInt(row[3]) || 0;
+        const gols = parseInt(row[3]) || 0; // ALTERAÇÃO: Corrigido row['Data'] para row[3]
         if (time) golsPorTime[time] = (golsPorTime[time] || 0) + gols;
     });
     const golsTomados = {};
     allDataSheet1.slice(1).forEach(row => {
         const mandante = row[4];
         const visitante = row[7];
-        const placar1 = parseInt(row[5]) || 0;
-        const placar2 = parseInt(row[6]) || 0;
+        const placar1 = parseInt(row[5]) || 0; // ALTERAÇÃO: Corrigido row['Placar 1'] para row[5]
+        const placar2 = parseInt(row[6]) || 0; // ALTERAÇÃO: Corrigido row['Placar 2'] para row[6]
         if (mandante) golsTomados[mandante] = (golsTomados[mandante] || 0) + placar2;
         if (visitante) golsTomados[visitante] = (golsTomados[visitante] || 0) + placar1;
     });
     if (filters.clube) {
         Object.keys(golsTomados).forEach(team => {
-            if (team !== filters.clube) delete golsTomados[team];
+            if (team !== filters.clube) delete golsTomados[team]; // ALTERAÇÃO: Corrigido teamfilters.clube para filters.clube
         });
         Object.keys(golsPorTime).forEach(team => {
-            if (team !== filters.clube) delete golsPorTime[team];
+            if (team !== filters.clube) delete golsPorTime[team]; // ALTERAÇÃO: Corrigido team.filters.clube para filters.clube
         });
     }
     const sortedTeamsGols = Object.entries(golsPorTime).sort((a, b) => b[1] - a[1]);
     const labels = sortedTeamsGols.map(([team]) => team);
     const dataGols = sortedTeamsGols.map(([_, gols]) => gols);
-    const dataTomados = labels.map(team => golsTomados[team] || 0);
+    const dataTomados = labels.map(team => golsTomados[team] || 0); // ALTERAÇÃO: Corrigido itemgolsTomados para golsTomados
     if (golsChart2) golsChart2.destroy();
     golsChart2 = new Chart(canvasGolsChart, {
-        data: { // ALTERAÇÃO: Removido type global, datasets definem seus próprios tipos
+        data: {
             labels: labels,
             datasets: [
                 {
-                    type: 'bar', // ALTERAÇÃO: Especificado como barra
+                    type: 'bar',
                     label: 'Gols Feitos',
                     data: dataGols,
                     backgroundColor: '#3b82f6',
                     borderColor: '#1d4ed8',
-                    borderWidth: 0,
-                    barPercentage: 0.9,
-                    categoryPercentage: 0.8
+                    borderWidth: 1,
+                    barPercentage: 0.45, // ALTERAÇÃO: Barra larga para Gols Feitos
+                    categoryPercentage: 0.5 // ALTERAÇÃO: Centraliza no mesmo espaço
                 },
                 {
-                    type: 'line', // ALTERAÇÃO: Gols Tomados agora é uma linha
+                    type: 'bar',
                     label: 'Gols Tomados',
                     data: dataTomados,
-                    borderColor: '#ef4444',
-                    backgroundColor: 'transparent', // ALTERAÇÃO: Fundo leve para área sob a linha
+                    backgroundColor: 'rgba(239, 68, 68, 0.6)', // ALTERAÇÃO: Transparência para visibilidade
+                    borderColor: '#b91c1c',
                     borderWidth: 1,
-                    pointStyle: 'circle', // ALTERAÇÃO: Pontos visíveis como círculos
-                    pointRadius: 4,
-                    pointBackgroundColor: '#ef4444',
-                    fill: true // ALTERAÇÃO: Preenche a área sob a linha
+                    barPercentage: 0.2, // ALTERAÇÃO: Barra estreita para Gols Tomados
+                    categoryPercentage: 0.5 // ALTERAÇÃO: Mesmo espaço para sobreposição
                 }
             ]
         },
@@ -657,77 +657,54 @@ function displayEstatisticas2() {
             maintainAspectRatio: false,
             layout: { padding: { bottom: 0 } },
             scales: {
-                y: { 
-                    beginAtZero: true, 
-                    title: { display: false }, 
-                    ticks: { stepSize: 1 } 
+                y: {
+                    beginAtZero: true,
+                    title: { display: false },
+                    ticks: { stepSize: 1 }
                 },
-                x: { 
-                    title: { display: false }, 
-                    ticks: { 
-                        rotation: 90, 
-                        autoSkip: false, 
-                        font: { size: 10 }, 
-                        padding: 20	, 
-                        maxRotation: 90, 
-                        minRotation: 90 
-                    }, 
-                    grid: { display: false } 
+                x: {
+                    title: { display: false },
+                    ticks: {
+                        rotation: 90,
+                        autoSkip: false,
+                        font: { size: 10 },
+                        padding: 10,
+                        maxRotation: 90,
+                        minRotation: 90
+                    },
+                    grid: { display: false }
                 }
             },
-            plugins: { 
-                legend: { 
-                    display: true, 
-                    position: 'bottom' // ALTERAÇÃO: Legenda ativada na parte inferior
-                }, 
-                title: { display: false, text: 'Gols Feitos e Tomados' } 
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom' // ALTERAÇÃO: Legenda na parte inferior
+                },
+                title: { display: false, text: 'Gols Feitos e Tomados' }
             }
         },
-plugins: [{
-    id: 'customDatalabels',
-    afterDraw: (chart) => {
-        const ctx = chart.ctx;
-        chart.data.datasets.forEach((dataset, datasetIndex) => {
-            const meta = chart.getDatasetMeta(datasetIndex);
-            meta.data.forEach((element, index) => {
-                const value = dataset.data[index];
-                if (value > 0) {
-                    const x = element.x;
-                    
-                    ctx.save();
-                    ctx.textAlign = 'center';
-                    ctx.font = 'bold 9px Arial';
-                    ctx.fillStyle = '#FFFFFF'; // Fonte do label
-                    
-                    if (dataset.type === 'line') {
-                        // Configurações para GOLS TOMADOS (linha)
-                        const y = element.y - 8;
-                        
-                        // Círculo reduzido (1 ponto de raio)
-                        ctx.beginPath();
-                        ctx.arc(x, element.y, 1, 0, Math.PI * 2); // Raio 1
-                        ctx.fillStyle = '#ef4444'; // Cor do ponto
-                        ctx.fill();
-                        
-                        // Texto preto
-                        ctx.fillStyle = '#000000';
-                        ctx.fillText(value, x, y);
-                        
-                    } else {
-                        // Configurações para GOLS FEITOS (barra)
-                        const yPosition = element.base - 5;
-                        
-                        // REMOVIDO o fundo azul escuro
-                        // Apenas texto preto
-                        ctx.fillText(value, x, yPosition);
-                    }
-                    
-                    ctx.restore();
-                }
-            });
-        });
-    }
-}]
+        plugins: [{
+            id: 'customDatalabels',
+            afterDraw: (chart) => {
+                const ctx = chart.ctx;
+                chart.data.datasets.forEach((dataset, datasetIndex) => {
+                    const meta = chart.getDatasetMeta(datasetIndex);
+                    meta.data.forEach((bar, index) => {
+                        const value = dataset.data[index];
+                        if (value > 0) {
+                            const x = bar.x;
+                            const y = datasetIndex === 1 ? bar.y - 15 : bar.y - 10; // ALTERAÇÃO: Rótulos ajustados
+                            ctx.save();
+                            ctx.textAlign = 'center';
+                            ctx.font = '10px Arial';
+                            ctx.fillStyle = '#000';
+                            ctx.fillText(value, x, y);
+                            ctx.restore();
+                        }
+                    });
+                });
+            }
+        }]
     });
     if (labels.length === 0) {
         showError('Nenhum dado disponível para o gráfico.');
@@ -805,7 +782,7 @@ async function init() {
     allDataClassification = await fetchFirebaseData('classificacao');
     allDataArtilharia = await fetchFirebaseData('artilharia');
     if (allDataSheet1.length <= 1) showError('Nenhum dado disponível no nó jogos.');
-    if (allDataClassification.length <= 1) showError('Nenhum dado disponível no nó classificacao.');
+    if (allDataClassification.length <= 1) showError('Nenhum dado disponível no nó classificacao.'); // ALTERAÇÃO: Corrigido throw para showError
     if (allDataArtilharia.length <= 1) showError('Nenhum dado disponível no nó artilharia.');
     populateFilters();
     document.querySelectorAll('.tab-button').forEach(btn => {

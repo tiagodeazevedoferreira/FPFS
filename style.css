@@ -299,6 +299,6 @@ th.sort-desc::after {
 .chart-container {
     position: relative;
     margin: auto;
-    height: 400px;
+    height: 200px;
     width: 100%;
 }
