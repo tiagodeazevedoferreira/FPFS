@@ -268,30 +268,28 @@ th.sort-desc::after {
   }
 }
 
-/* Estilização para gráficos lado a lado na aba Estatísticas 2 */
-#estatisticas2 .charts-container {
-  display: flex;
-  flex-wrap: nowrap; /* Impede quebra de linha */
-  gap: 0; /* Remove espaçamento entre os gráficos */
-  justify-content: flex-start; /* Alinha à esquerda */
-  overflow-x: auto; /* Permite rolagem horizontal */
-  padding: 0.5rem;
-  -webkit-overflow-scrolling: touch;
+/* ALTERAÇÃO: Reduzir espaço entre os gráficos na aba Estatísticas */
+#estatisticas .chart-container {
+    padding-top: 0.5rem; /* Reduz padding superior */
+    padding-bottom: 0.5rem; /* Reduz padding inferior */
+    margin: 0 auto !important; /* Remove margens verticais completamente */
 }
 
-#estatisticas2 .chart-container {
-  flex: 0 0 auto; /* Evita expansão desnecessária */
-  min-width: 280px; /* Ajustado para gráficos menores */
-  max-width: 320px; /* Limite para consistência */
-  margin: 0; /* Remove margens */
-  padding: 0.5rem; /* Padding mínimo */
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+#estatisticas .chart-container + .chart-container {
+    margin-top: 0 !important;
+    border-top-left-radius: 0 !important; /* Remove arredondamento superior */
+    border-top-right-radius: 0 !important;
 }
 
-#estatisticas2 .chart-container canvas {
-  width: 100% !important;
-  height: 300px !important; /* Altura fixa para visibilidade */
-  margin: 0 !important;
+#estatisticas .chart-container:first-child {
+    margin-bottom: 0 !important;
+    border-bottom-left-radius: 0 !important; /* Remove arredondamento inferior */
+    border-bottom-right-radius: 0 !important;
+}
+
+/* Container do gráfico combinado - mesmo tamanho que Gols Tomados */
+#canvasGolsChart {
+    height: 400px !important; /* Ou a altura específica do seu gráfico Gols Tomados */
+    width: 100% !important;
+    min-height: 400px; /* Garante altura mínima */
 }
