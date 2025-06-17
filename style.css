@@ -266,23 +266,34 @@ th.sort-desc::after {
     max-width: 100%;
     padding: 0.5rem;
   }
+
+  #estatisticas2 .charts-container {
+    flex-direction: column;
+  }
+
+  #estatisticas2 .chart-container {
+    min-width: 100%;
+  }
 }
 
-/* ALTERAÇÃO: Reduzir espaço entre os gráficos na aba Estatísticas */
-#estatisticas .chart-container {
-    padding-top: 0.5rem; /* Reduz padding superior */
-    padding-bottom: 0.5rem; /* Reduz padding inferior */
-    margin: 0 auto !important; /* Remove margens verticais completamente */
+/* Estilização para gráficos lado a lado na aba Estatísticas 2 */
+#estatisticas2 .charts-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
 }
 
-#estatisticas .chart-container + .chart-container {
-    margin-top: 0 !important;
-    border-top-left-radius: 0 !important; /* Remove arredondamento superior */
-    border-top-right-radius: 0 !important;
+#estatisticas2 .chart-container {
+  flex: 1;
+  min-width: 300px;
+  max-width: 600px;
+  margin: 0.5rem auto;
+  padding: 0.5rem;
+  min-height: 400px; /* Altura mínima para gráficos horizontais */
 }
 
-#estatisticas .chart-container:first-child {
-    margin-bottom: 0 !important;
-    border-bottom-left-radius: 0 !important; /* Remove arredondamento inferior */
-    border-bottom-right-radius: 0 !important;
+/* Ajuste para gráficos horizontais */
+#estatisticas2 .chart-container canvas {
+  height: 350px !important; /* Altura fixa para evitar corte de rótulos */
 }

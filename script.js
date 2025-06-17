@@ -9,10 +9,10 @@ let sortConfigPlacar = { column: 18, direction: 'asc' }; // Default to Index col
 let allDataArtilharia = []; // Dados do nó artilharia
 let golsPorTimeChart = null; // Referência ao gráfico Chart.js
 let golsTomadosChart = null; // Referência ao gráfico de gols tomados
-let golsChart2 = null; // Referência ao gráfico combinado (Estatísticas 2)
+let golsPorTimeChart2 = null; // Referência ao gráfico de Gols Feitos (Estatísticas 2)
+let golsTomadosChart2 = null; // Referência ao gráfico de Gols Tomados (Estatísticas 2)
 let timesApelidos = {}; // Mapa de times/clubes para apelidos
 
-// ALTERAÇÃO: Função para formatar strings em Title Case
 function toTitleCase(str) {
     if (!str || typeof str !== 'string') return '';
     return str
@@ -89,7 +89,6 @@ async function fetchFirebaseData(node) {
                 const index = parseInt(key.split('_').pop()) || 0;
                 const mandante = timesApelidos[row['Mandante']] || row['Mandante'];
                 const visitante = timesApelidos[row['Visitante']] || row['Visitante'];
-                // ALTERAÇÃO: Formatar o campo Ginásio em Title Case
                 const ginásio = toTitleCase(row['Ginásio'] || '');
                 console.log(`Jogos - Mandante: ${row['Mandante']} -> ${mandante}, Visitante: ${row['Visitante']} -> ${visitante}, Ginásio: ${row['Ginásio']} -> ${ginásio}`);
                 const rowArray = [
@@ -132,7 +131,6 @@ async function fetchFirebaseData(node) {
                 }
                 const index = parseInt(key.split('_').pop()) || 0;
                 const clube = timesApelidos[row['2']] || row['2'];
-                // ALTERAÇÃO: Formatar o campo Jogador em Title Case
                 const jogador = toTitleCase(row['1'] || '');
                 console.log(`Artilharia - Clube: ${row['2']} -> ${clube}, Jogador: ${row['1']} -> ${jogador}`);
                 dataArray.push([index, jogador, clube, row['3'] || '']);
@@ -586,8 +584,9 @@ function displayEstatisticas() {
 function displayEstatisticas2() {
     console.log('Exibindo dados da Estatísticas 2');
     clearError();
-    const canvasGolsChart = document.getElementById('golsChart2');
-    if (!checkElement(canvasGolsChart, '#golsChart2')) {
+    const canvasGolsPorTime = document.getElementById('golsPorTimeChart2');
+    const canvasGolsTomados = document.getElementById('golsTomadosChart2');
+    if (!checkElement(canvasGolsPorTime, '#golsPorTimeChart2') || !checkElement(canvasGolsTomados, '#golsTomadosChart2')) {
         showError('Erro interno: canvas do gráfico não encontrado.');
         return;
     }
@@ -624,61 +623,45 @@ function displayEstatisticas2() {
         });
     }
     const sortedTeamsGols = Object.entries(golsPorTime).sort((a, b) => b[1] - a[1]);
-    const labels = sortedTeamsGols.map(([team]) => team);
+    const labelsGols = sortedTeamsGols.map(([team]) => team);
     const dataGols = sortedTeamsGols.map(([_, gols]) => gols);
-    const dataTomados = labels.map(team => golsTomados[team] || 0);
-    if (golsChart2) golsChart2.destroy();
-    golsChart2 = new Chart(canvasGolsChart, {
+    const labelsTomados = labelsGols;
+    const dataTomados = labelsGols.map(team => golsTomados[team] || 0);
+    if (golsPorTimeChart2) golsPorTimeChart2.destroy();
+    if (golsTomadosChart2) golsTomadosChart2.destroy();
+    golsPorTimeChart2 = new Chart(canvasGolsPorTime, {
         type: 'bar',
         data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Gols Feitos',
-                    data: dataGols,
-                    backgroundColor: '#3b82f6',
-                    borderColor: '#1d4ed8',
-                    borderWidth: 1,
-                    barPercentage: 0.45,
-                    categoryPercentage: 0.5
-                },
-                {
-                    label: 'Gols Tomados',
-                    data: dataTomados,
-                    backgroundColor: '#ef4444',
-                    borderColor: '#b91c1c',
-                    borderWidth: 1,
-                    barPercentage: 0.45,
-                    categoryPercentage: 0.5
-                }
-            ]
+            labels: labelsGols,
+            datasets: [{
+                label: 'Gols Feitos',
+                data: dataGols,
+                backgroundColor: '#3b82f6',
+                borderColor: '#1d4ed8',
+                borderWidth: 1
+            }]
         },
         options: {
+            indexAxis: 'y', // Barras horizontais
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: { bottom: 0 } },
+            layout: { padding: { left: 10, right: 10 } },
             scales: {
-                y: { 
+                x: { 
                     beginAtZero: true, 
                     title: { display: false }, 
-                    ticks: { stepSize: 1 } 
+                    ticks: { stepSize: 1, font: { size: 10 } },
+                    grid: { display: true }
                 },
-                x: { 
+                y: { 
                     title: { display: false }, 
-                    ticks: { 
-                        rotation: 90, 
-                        autoSkip: false, 
-                        font: { size: 10 }, 
-                        padding: 10, 
-                        maxRotation: 90, 
-                        minRotation: 90 
-                    }, 
-                    grid: { display: false } 
+                    ticks: { font: { size: 10 }, padding: 5 },
+                    grid: { display: false }
                 }
             },
             plugins: { 
-                legend: { display: true, position: 'top' }, 
-                title: { display: false } 
+                legend: { display: false }, 
+                title: { display: false, text: 'Gols Feitos' }
             }
         },
         plugins: [{
@@ -690,10 +673,10 @@ function displayEstatisticas2() {
                     meta.data.forEach((bar, index) => {
                         const value = dataset.data[index];
                         if (value > 0) {
-                            const x = bar.x;
-                            const y = bar.y - 10;
+                            const x = bar.x + 10; // Ajuste para barras horizontais
+                            const y = bar.y;
                             ctx.save();
-                            ctx.textAlign = 'center';
+                            ctx.textAlign = 'left';
                             ctx.font = '10px Arial';
                             ctx.fillStyle = '#000';
                             ctx.fillText(value, x, y);
@@ -704,8 +687,66 @@ function displayEstatisticas2() {
             }
         }]
     });
-    if (labels.length === 0) {
-        showError('Nenhum dado disponível para o gráfico.');
+    golsTomadosChart2 = new Chart(canvasGolsTomados, {
+        type: 'bar',
+        data: {
+            labels: labelsTomados,
+            datasets: [{
+                label: 'Gols Tomados',
+                data: dataTomados,
+                backgroundColor: '#ef4444',
+                borderColor: '#b91c1c',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y', // Barras horizontais
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: { padding: { left: 10, right: 10 } },
+            scales: {
+                x: { 
+                    beginAtZero: true, 
+                    title: { display: false }, 
+                    ticks: { stepSize: 1, font: { size: 10 } },
+                    grid: { display: true }
+                },
+                y: { 
+                    title: { display: false }, 
+                    ticks: { font: { size: 10 }, padding: 5 },
+                    grid: { display: false }
+                }
+            },
+            plugins: { 
+                legend: { display: false }, 
+                title: { display: false, text: 'Gols Tomados' }
+            }
+        },
+        plugins: [{
+            id: 'customDatalabels',
+            afterDraw: (chart) => {
+                const ctx = chart.ctx;
+                chart.data.datasets.forEach((dataset, datasetIndex) => {
+                    const meta = chart.getDatasetMeta(datasetIndex);
+                    meta.data.forEach((bar, index) => {
+                        const value = dataset.data[index];
+                        if (value > 0) {
+                            const x = bar.x + 10; // Ajuste para barras horizontais
+                            const y = bar.y;
+                            ctx.save();
+                            ctx.textAlign = 'left';
+                            ctx.font = '10px Arial';
+                            ctx.fillStyle = '#000';
+                            ctx.fillText(value, x, y);
+                            ctx.restore();
+                        }
+                    });
+                });
+            }
+        }]
+    });
+    if (labelsGols.length === 0 && labelsTomados.length === 0) {
+        showError('Nenhum dado disponível para os gráficos.');
     }
 }
 
