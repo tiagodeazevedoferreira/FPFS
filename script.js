@@ -656,7 +656,7 @@ function displayEstatisticas2() {
                 indexAxis: 'y', // Barras horizontais
                 responsive: true,
                 maintainAspectRatio: false,
-                layout: { padding: { left: 10, right: 10, top: 10, bottom: 10 } },
+                layout: { padding: { left: 0, right: 20, top: 10, bottom: 10 } },
                 scales: {
                     x: { 
                         beginAtZero: true, 
@@ -667,13 +667,14 @@ function displayEstatisticas2() {
                             rotation: 0, // Eixo X horizontal
                             maxRotation: 0 
                         },
-                        grid: { display: true }
+                        grid: { display: true },
+                        offset: false // Colar barras na borda
                     },
                     y: { 
                         title: { display: false }, 
                         ticks: { 
                             font: { size: 10 }, 
-                            padding: 5, 
+                            padding: 0, 
                             autoSkip: false, // Mostra todos os times
                             maxTicksLimit: undefined 
                         },
