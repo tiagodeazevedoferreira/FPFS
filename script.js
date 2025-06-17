@@ -656,7 +656,7 @@ function displayEstatisticas2() {
                 indexAxis: 'y', // Barras horizontais
                 responsive: true,
                 maintainAspectRatio: false,
-                layout: { padding: { left: 0, right: 20, top: 10, bottom: 10 } },
+                layout: { padding: { left: 0, right: 25, top: 10, bottom: 10 } },
                 scales: {
                     x: { 
                         beginAtZero: true, 
