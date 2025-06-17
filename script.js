@@ -635,15 +635,15 @@ function displayEstatisticas2() {
                     backgroundColor: '#3b82f6',
                     borderColor: '#1d4ed8',
                     borderWidth: 0,
-                    barPercentage: 0.45,
-                    categoryPercentage: 0.5
+                    barPercentage: 0.9,
+                    categoryPercentage: 0.8
                 },
                 {
                     type: 'line', // ALTERAÇÃO: Gols Tomados agora é uma linha
                     label: 'Gols Tomados',
                     data: dataTomados,
                     borderColor: '#ef4444',
-                    backgroundColor: 'rgba(239, 68, 68, 0.1)', // ALTERAÇÃO: Fundo leve para área sob a linha
+                    backgroundColor: 'transparent', // ALTERAÇÃO: Fundo leve para área sob a linha
                     borderWidth: 1,
                     pointStyle: 'circle', // ALTERAÇÃO: Pontos visíveis como círculos
                     pointRadius: 4,
@@ -668,7 +668,7 @@ function displayEstatisticas2() {
                         rotation: 90, 
                         autoSkip: false, 
                         font: { size: 10 }, 
-                        padding: 20, 
+                        padding: 20	, 
                         maxRotation: 90, 
                         minRotation: 90 
                     }, 
@@ -696,39 +696,29 @@ plugins: [{
                     
                     ctx.save();
                     ctx.textAlign = 'center';
-                    ctx.font = 'bold 10px Arial';
+                    ctx.font = 'bold 9px Arial';
+                    ctx.fillStyle = '#FFFFFF'; // Fonte do label
                     
                     if (dataset.type === 'line') {
-                        // Configurações para a LINHA
-                        ctx.fillStyle = '#ef4444'; // Vermelho
-                        ctx.textBaseline = 'bottom';
-                        const y = element.y - 8; // 8px acima do ponto
-                        ctx.fillText(value, x, y);
+                        // Configurações para GOLS TOMADOS (linha)
+                        const y = element.y - 8;
                         
-                        // Adiciona círculo de fundo branco para melhor contraste
+                        // Círculo reduzido (1 ponto de raio)
                         ctx.beginPath();
-                        ctx.arc(x, element.y, 10, 0, Math.PI * 2);
-                        ctx.fillStyle = 'white';
+                        ctx.arc(x, element.y, 1, 0, Math.PI * 2); // Raio 1
+                        ctx.fillStyle = '#ef4444'; // Cor do ponto
                         ctx.fill();
-                        ctx.fillStyle = '#ef4444'; // Restaura cor do texto
+                        
+                        // Texto preto
+                        ctx.fillStyle = '#000000';
                         ctx.fillText(value, x, y);
+                        
                     } else {
-                        // Configurações para a BARRA
-                        ctx.fillStyle = '#ffffff'; // Branco
-                        ctx.textBaseline = 'bottom';
-                        const yPosition = element.base - 5; // 5px acima da base
+                        // Configurações para GOLS FEITOS (barra)
+                        const yPosition = element.base - 5;
                         
-                        // Adiciona fundo escuro para melhor contraste
-                        const textWidth = ctx.measureText(value).width;
-                        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-                        ctx.fillRect(
-                            x - textWidth/2 - 2, 
-                            yPosition - 12, 
-                            textWidth + 4, 
-                            14
-                        );
-                        
-                        ctx.fillStyle = '#ffffff'; // Restaura cor do texto
+                        // REMOVIDO o fundo azul escuro
+                        // Apenas texto preto
                         ctx.fillText(value, x, yPosition);
                     }
                     

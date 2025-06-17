@@ -288,8 +288,17 @@ th.sort-desc::after {
 }
 
 /* Container do gráfico combinado - mesmo tamanho que Gols Tomados */
-#canvasGolsChart {
-    height: 400px !important; /* Ou a altura específica do seu gráfico Gols Tomados */
-    width: 100% !important;
-    min-height: 400px; /* Garante altura mínima */
+/* Garante que ambos os gráficos tenham o mesmo tamanho */
+#golsTomadosChart, #canvasGolsChart {
+    height: 400px;
+    width: 100%;
+    min-height: 400px;
+}
+
+/* Ajuste adicional para container pai, se necessário */
+.chart-container {
+    position: relative;
+    margin: auto;
+    height: 400px;
+    width: 100%;
 }
