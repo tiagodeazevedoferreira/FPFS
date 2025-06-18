@@ -1,4 +1,8 @@
-body {
+/* ALTERAÇÃO: Garantir que html e body ocupem altura total para permitir 100vh na tabela */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
   font-family: 'Roboto', sans-serif;
   background-color: #f9f9f9 !important;
 }
@@ -240,6 +244,75 @@ th.sort-desc::after {
   color: #d97706 !important;
 }
 
+/* ALTERAÇÃO: Estilos para fazer a tabela Artilharia ocupar a tela inteira em telas menores */
+@media screen and (max-width: 640px) {
+  main, .container {
+    height: 100%; /* Garante que o contêiner pai ocupe a altura total */
+    margin: 0;
+    padding: 0;
+  }
+
+  #artilharia {
+    display: flex;
+    flex-direction: column;
+    width: 100vw; /* Ocupa toda a largura do viewport */
+    height: 100vh; /* Ocupa toda a altura do viewport */
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Evita barras de rolagem externas */
+  }
+
+  #artilharia .table-container {
+    width: 100vw !important; /* Ocupa toda a largura do viewport */
+    height: 100%; /* Usa toda a altura disponível */
+    overflow-x: auto; /* Rolagem horizontal */
+    overflow-y: auto; /* Rolagem vertical */
+    display: block;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #artilhariaTable {
+    width: 100vw !important; /* Ocupa toda a largura do viewport */
+    height: 100%; /* Usa toda a altura disponível */
+    display: table;
+    table-layout: fixed; /* Substitui table-layout: auto para melhor controle */
+    overflow-x: auto;
+    overflow-y: auto;
+    margin: 0 !important;
+  }
+
+  #artilhariaTable thead, #artilhariaTable tbody {
+    display: table;
+    width: 100%; /* Garante que thead e tbody ocupem a largura total */
+  }
+
+  #artilhariaTable th, #artilhariaTable td {
+    padding: 2px 4px !important; /* Mantém padding reduzido para telas menores */
+    font-size: 12px !important; /* Reduz fonte para melhor ajuste */
+    min-width: 60px; /* Evita colunas muito estreitas */
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  #artilhariaTable thead {
+    position: sticky; /* Fixa o cabeçalho */
+    top: 0;
+    background-color: #2563eb; /* Mantém a cor do th */
+    z-index: 10;
+  }
+
+  /* Ajusta filtros para não interferirem na tabela */
+  #artilharia .filters {
+    padding: 8px;
+    background-color: #f2f2f2;
+    position: sticky;
+    top: 0;
+    z-index: 20; /* Acima do thead */
+  }
+}
+
+/* Estilos existentes para telas menores */
 @media (max-width: 768px) {
   .filters {
     font-size: 0.9rem;
@@ -264,24 +337,13 @@ th.sort-desc::after {
     padding: 0.4rem 0.8rem;
   }
 
-#estatisticas .chart-container canvas {
+  #estatisticas .chart-container canvas {
     width: 100% !important;
-    height: 200px !important; /* Altura reduzida para os gráficos */
-    margin: 0 !important;
-}
+    height: 150px !important; /* Altura para telas menores */
+  }
 
-#estatisticas .chart-container {
-    max-width: 600px;
-    padding: 0.1rem;
-    margin: 0.1rem auto;
-}
-
-@media (max-width: 768px) {
-    #estatisticas .chart-container canvas {
-        height: 150px !important; /* Altura para telas menores */
-    }
-    #estatisticas .chart-container {
-        max-width: 100%;
-        padding: 0.5rem;
-    }
+  #estatisticas .chart-container {
+    max-width: 100%;
+    padding: 0.5rem;
+  }
 }
