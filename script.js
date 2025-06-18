@@ -9,10 +9,10 @@ let sortConfigPlacar = { column: 18, direction: 'asc' }; // Default to Index col
 let allDataArtilharia = []; // Dados do nó artilharia
 let golsPorTimeChart = null; // Referência ao gráfico Chart.js
 let golsTomadosChart = null; // Referência ao gráfico de gols tomados
-let golsChart2 = null; // Referência ao gráfico combinado (Estatísticas 2)
+let golsPorTimeChart2 = null; // Referência ao gráfico de Gols Feitos (Estatísticas 2)
+let golsTomadosChart2 = null; // Referência ao gráfico de Gols Tomados (Estatísticas 2)
 let timesApelidos = {}; // Mapa de times/clubes para apelidos
 
-// Função para formatar strings em Title Case
 function toTitleCase(str) {
     if (!str || typeof str !== 'string') return '';
     return str
@@ -109,7 +109,7 @@ async function fetchFirebaseData(node) {
                 }
             });
         } else if (node === 'classificacao') {
-            const headers = ['Index', 'Posição', 'Time', 'Pontos', 'Jogos', 'Vitórias', 'Empates', 'Derrotas', 'Gols Pró', 'Gols Contra', 'Saldo', 'Aproveitamento'];
+            const headers = ['Index', 'Posição', 'Time', 'Pontos', 'Jogos', 'Vitórias', 'Empates', 'Derrotas', 'Gols Próprio', 'Gols Contra', 'Saldo', 'Aproveitamento'];
             dataArray.push(headers);
             Object.entries(data).forEach(([key, row]) => {
                 if (key === '0' || !row['2']) {
@@ -186,7 +186,6 @@ function populateFilters() {
         { id: 'jogador', indices: [1], tab: 'artilharia' },
         { id: 'clube', indices: [2], tab: 'estatisticas' },
         { id: 'jogador', indices: [1], tab: 'estatisticas' },
-        { id: 'clube', indices: [2], tab: 'estatisticas2' }
     ];
     filters.forEach(filter => {
         const select = document.getElementById(`${filter.id}-${filter.tab}`);
@@ -227,7 +226,7 @@ function sortData(data, columnIndex, direction) {
         }
         valueA = valueA.toString().toLowerCase();
         valueB = valueB.toString().toLowerCase();
-        return direction === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueB);
+        return direction === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
     });
     return sortedData;
 }
@@ -253,7 +252,7 @@ function displayData(data, filteredData, page) {
         th.className = 'p-2 sortable';
         th.dataset.index = columnIndices[idx];
         if (sortConfigPlacar.column === columnIndices[idx]) {
-            th.classList.add(sortConfigPlacar.direction === 'asc' ? 'asc-' : 'desc-asc');
+            th.classList.add(sortConfigPlacar.direction === 'asc' ? 'sort-asc' : 'sort-desc');
         }
         th.addEventListener('click', () => {
             const newDirection = sortConfigPlacar.column === columnIndices[idx] && sortConfigPlacar.direction === 'asc' ? 'desc' : 'asc';
@@ -296,7 +295,7 @@ function displayClassification() {
     const filteredData = filterDataClassification(allDataClassification, filters);
     const trHead = document.createElement('tr');
     trHead.className = 'bg-gray-200';
-    const headers = ['Posição', 'Time', 'Pontos', 'Jogos', 'Vitórias', 'Empates', 'Derrotas', 'Gols Pró', 'Gols Contra', 'Saldo', 'Aproveitamento'];
+    const headers = ['Posição', 'Time', 'Pontos', 'Jogos', 'Vitórias', 'Empates', 'Derrotas', 'Gols Próprio', 'Gols Contra', 'Saldo', 'Aproveitamento'];
     headers.forEach(text => {
         const th = document.createElement('th');
         th.textContent = text;
@@ -490,24 +489,22 @@ function displayEstatisticas() {
         data: {
             labels: labelsGols,
             datasets: [{
-                label: 'Gols feitos',
+                label: 'Gols Feitos',
                 data: dataGols,
                 backgroundColor: '#3b82f6',
                 borderColor: '#1d4ed8',
-                borderWidth: 0,
-				barPercentage: 0.9, // ALTERAÇÃO: Aumenta a largura da barra dentro da categoria
-				categoryPercentage: 0.8
+                borderWidth: 1
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
-            layout: { padding: { bottom: 0, top: 25 , left: 0, right: 0} },
+            maintainAspectRatio: true,
+            layout: { padding: { bottom: 0 , top: 25} },
             scales: {
-                y: { beginAtZero: true, title: { display: false }, ticks: { stepSize: 1 } },
-                x: { title: { display: false }, ticks: { rotation: 90, autoSkip: false, font: { size: 10 }, padding: 0, maxRotation: 90, minRotation: 90 }, grid: { display: false }  , position: 'left'}
+                y: { beginAtZero: true, title: { display: false }, ticks: { stepSize: 1 , font: { size: 8 }} },
+                x: { title: { display: false }, ticks: { rotation: 90, autoSkip: false, font: { size: 10 }, padding: 0, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
             },
-            plugins: { legend: { display: false }, title: { display: false, text: 'Gols feitos' } }
+            plugins: { legend: { display: false }, title: { display: false, text: 'Gols Feitos' } }
         },
         plugins: [{
             id: 'customDatalabels',
@@ -546,11 +543,11 @@ function displayEstatisticas() {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
-            layout: { padding: { bottom: 0, top: 25 , left: 0, right: 0} },
+            maintainAspectRatio: true,
+            layout: { padding: { bottom: 0 , top: 25} },
             scales: {
-                y: { beginAtZero: true, title: { display: false }, ticks: { stepSize: 1 } },
-                x: { title: { display: false }, ticks: { display: true, rotation: 90, autoSkip: false, font: { size: 10 }, padding: 10, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
+                y: { beginAtZero: true, title: { display: false }, ticks: { stepSize: 1 , font: { size: 8 } } },
+                x: { title: { display: false }, ticks: { display: true, rotation: 90, autoSkip: false, font: { size: 10 }, padding: 5, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
             },
             plugins: { legend: { display: false }, title: { display: false, text: 'Gols Tomados' } }
         },
@@ -582,134 +579,7 @@ function displayEstatisticas() {
     }
 }
 
-function displayEstatisticas2() {
-    console.log('Exibindo dados da Estatísticas 2');
-    clearError();
-    const canvasGolsChart = document.getElementById('canvasGolsChart');
-    if (!checkElement(canvasGolsChart, '#canvasGolsChart')) { // ALTERAÇÃO: Corrigido checkElement para canvasGolsChart
-        showError('Erro interno: canvas do gráfico não encontrado.');
-        return;
-    }
-    if (typeof Chart === 'undefined') { // ALTERAÇÃO: Corrigido verificação para Chart em vez de window
-        showError('Erro ao carregar o gráfico: Chart.js não está disponível.');
-        return;
-    }
-    const filters = {
-        clube: document.getElementById('clube-estatisticas2')?.value || ''
-    };
-    const filteredDataArtilharia = filterDataArtilharia(allDataArtilharia, filters);
-    const golsPorTime = {};
-    filteredDataArtilharia.forEach(row => {
-        const time = row[2];
-        const gols = parseInt(row[3]) || 0; // ALTERAÇÃO: Corrigido row['Data'] para row[3]
-        if (time) golsPorTime[time] = (golsPorTime[time] || 0) + gols;
-    });
-    const golsTomados = {};
-    allDataSheet1.slice(1).forEach(row => {
-        const mandante = row[4];
-        const visitante = row[7];
-        const placar1 = parseInt(row[5]) || 0; // ALTERAÇÃO: Corrigido row['Placar 1'] para row[5]
-        const placar2 = parseInt(row[6]) || 0; // ALTERAÇÃO: Corrigido row['Placar 2'] para row[6]
-        if (mandante) golsTomados[mandante] = (golsTomados[mandante] || 0) + placar2;
-        if (visitante) golsTomados[visitante] = (golsTomados[visitante] || 0) + placar1;
-    });
-    if (filters.clube) {
-        Object.keys(golsTomados).forEach(team => {
-            if (team !== filters.clube) delete golsTomados[team]; // ALTERAÇÃO: Corrigido teamfilters.clube para filters.clube
-        });
-        Object.keys(golsPorTime).forEach(team => {
-            if (team !== filters.clube) delete golsPorTime[team]; // ALTERAÇÃO: Corrigido team.filters.clube para filters.clube
-        });
-    }
-    const sortedTeamsGols = Object.entries(golsPorTime).sort((a, b) => b[1] - a[1]);
-    const labels = sortedTeamsGols.map(([team]) => team);
-    const dataGols = sortedTeamsGols.map(([_, gols]) => gols);
-    const dataTomados = labels.map(team => golsTomados[team] || 0); // ALTERAÇÃO: Corrigido itemgolsTomados para golsTomados
-    if (golsChart2) golsChart2.destroy();
-    golsChart2 = new Chart(canvasGolsChart, {
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    type: 'bar',
-                    label: 'Gols Feitos',
-                    data: dataGols,
-                    backgroundColor: '#3b82f6',
-                    borderColor: '#1d4ed8',
-                    borderWidth: 1,
-                    barPercentage: 0.45, // ALTERAÇÃO: Barra larga para Gols Feitos
-                    categoryPercentage: 0.5 // ALTERAÇÃO: Centraliza no mesmo espaço
-                },
-                {
-                    type: 'bar',
-                    label: 'Gols Tomados',
-                    data: dataTomados,
-                    backgroundColor: 'rgba(239, 68, 68, 0.6)', // ALTERAÇÃO: Transparência para visibilidade
-                    borderColor: '#b91c1c',
-                    borderWidth: 1,
-                    barPercentage: 0.2, // ALTERAÇÃO: Barra estreita para Gols Tomados
-                    categoryPercentage: 0.5 // ALTERAÇÃO: Mesmo espaço para sobreposição
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: { padding: { bottom: 0 } },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: { display: false },
-                    ticks: { stepSize: 1 }
-                },
-                x: {
-                    title: { display: false },
-                    ticks: {
-                        rotation: 90,
-                        autoSkip: false,
-                        font: { size: 10 },
-                        padding: 10,
-                        maxRotation: 90,
-                        minRotation: 90
-                    },
-                    grid: { display: false }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'bottom' // ALTERAÇÃO: Legenda na parte inferior
-                },
-                title: { display: false, text: 'Gols Feitos e Tomados' }
-            }
-        },
-        plugins: [{
-            id: 'customDatalabels',
-            afterDraw: (chart) => {
-                const ctx = chart.ctx;
-                chart.data.datasets.forEach((dataset, datasetIndex) => {
-                    const meta = chart.getDatasetMeta(datasetIndex);
-                    meta.data.forEach((bar, index) => {
-                        const value = dataset.data[index];
-                        if (value > 0) {
-                            const x = bar.x;
-                            const y = datasetIndex === 1 ? bar.y - 15 : bar.y - 10; // ALTERAÇÃO: Rótulos ajustados
-                            ctx.save();
-                            ctx.textAlign = 'center';
-                            ctx.font = '10px Arial';
-                            ctx.fillStyle = '#000';
-                            ctx.fillText(value, x, y);
-                            ctx.restore();
-                        }
-                    });
-                });
-            }
-        }]
-    });
-    if (labels.length === 0) {
-        showError('Nenhum dado disponível para o gráfico.');
-    }
-}
+
 
 function displayPlacar() {
     const filters = {
@@ -751,12 +621,6 @@ function clearFilters(tabId) {
             if (el) el.value = '';
         });
         displayEstatisticas();
-    } else if (tabId === 'estatisticas2') {
-        ['clube-estatisticas2'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.value = '';
-        });
-        displayEstatisticas2();
     }
 }
 
@@ -772,7 +636,7 @@ function showTab(tabId) {
     else if (tabId === 'placar') displayPlacar();
     else if (tabId === 'artilharia') displayArtilharia();
     else if (tabId === 'estatisticas') displayEstatisticas();
-    else if (tabId === 'estatisticas2') displayEstatisticas2();
+
 }
 
 async function init() {
@@ -782,7 +646,7 @@ async function init() {
     allDataClassification = await fetchFirebaseData('classificacao');
     allDataArtilharia = await fetchFirebaseData('artilharia');
     if (allDataSheet1.length <= 1) showError('Nenhum dado disponível no nó jogos.');
-    if (allDataClassification.length <= 1) showError('Nenhum dado disponível no nó classificacao.'); // ALTERAÇÃO: Corrigido throw para showError
+    if (allDataClassification.length <= 1) showError('Nenhum dado disponível no nó classificacao.');
     if (allDataArtilharia.length <= 1) showError('Nenhum dado disponível no nó artilharia.');
     populateFilters();
     document.querySelectorAll('.tab-button').forEach(btn => {
@@ -803,8 +667,6 @@ async function init() {
     document.getElementById('limparFiltros-artilharia').addEventListener('click', () => clearFilters('artilharia'));
     document.getElementById('aplicarFiltros-estatisticas').addEventListener('click', displayEstatisticas);
     document.getElementById('limparFiltros-estatisticas').addEventListener('click', () => clearFilters('estatisticas'));
-    document.getElementById('aplicarFiltros-estatisticas2').addEventListener('click', displayEstatisticas2);
-    document.getElementById('limparFiltros-estatisticas2').addEventListener('click', () => clearFilters('estatisticas2'));
     if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
         try {
             await navigator.serviceWorker.register('sw.js');
