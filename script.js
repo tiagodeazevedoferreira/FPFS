@@ -499,7 +499,7 @@ function displayEstatisticas() {
         options: {
             responsive: true,
             maintainAspectRatio: true,
-            layout: { padding: { bottom: 0 , top: 25} },
+            layout: { padding: { bottom: 0 , right : 0, left : 0, top: 25} },
             scales: {
                 y: { beginAtZero: true, title: { display: false }, ticks: { stepSize: 1 , font: { size: 8 }} },
                 x: { title: { display: false }, ticks: { rotation: 90, autoSkip: false, font: { size: 10 }, padding: 0, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
@@ -544,7 +544,7 @@ function displayEstatisticas() {
         options: {
             responsive: true,
             maintainAspectRatio: true,
-            layout: { padding: { bottom: 0 , top: 25} },
+            layout: { padding: { bottom: 0 , right : 0, left : 0, top: 25} },
             scales: {
                 y: { beginAtZero: true, title: { display: false }, ticks: { stepSize: 1 , font: { size: 8 } } },
                 x: { title: { display: false }, ticks: { display: true, rotation: 90, autoSkip: false, font: { size: 10 }, padding: 5, maxRotation: 90, minRotation: 90 }, grid: { display: false } }

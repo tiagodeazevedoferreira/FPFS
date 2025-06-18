@@ -272,8 +272,8 @@ th.sort-desc::after {
 
 #estatisticas .chart-container {
     max-width: 600px;
-    padding: 0.5rem;
-    margin: 0.5rem auto;
+    padding: 0.1rem;
+    margin: 0.1rem auto;
 }
 
 @media (max-width: 768px) {
