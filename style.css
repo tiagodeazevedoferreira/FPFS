@@ -1,4 +1,4 @@
-/* ALTERAÇÃO: Garantir que html e body ocupem altura total para permitir 100vh na tabela */
+/* ALTERAÇÃO: Garantir que html e body ocupem altura total e removam margens */
 html, body {
   height: 100%;
   margin: 0;
@@ -88,9 +88,10 @@ html, body {
   background: #2563eb;
 }
 
+/* ALTERAÇÃO: Remover restrições de largura para Artilharia */
 #artilharia .table-container {
-  width: auto !important;
-  min-width: 0 !important;
+  width: 100% !important; /* Substitui width: auto */
+  min-width: 100% !important; /* Substitui min-width: 0 */
   display: block;
 }
 
@@ -133,10 +134,11 @@ th {
   color: white;
 }
 
+/* ALTERAÇÃO: Ajustar #artilhariaTable para remover restrições de largura */
 #artilhariaTable {
-  width: auto !important;
-  min-width: 0 !important;
-  table-layout: auto !important;
+  width: 100% !important; /* Substitui width: auto */
+  min-width: 100% !important; /* Substitui min-width: 0 */
+  table-layout: auto !important; /* Mantém ajuste dinâmico das colunas */
   margin: 0 !important;
 }
 
@@ -244,42 +246,47 @@ th.sort-desc::after {
   color: #d97706 !important;
 }
 
-/* ALTERAÇÃO: Estilos para fazer a tabela Artilharia ocupar a tela inteira em telas menores */
+/* ALTERAÇÃO: Estilos para fazer a tabela Artilharia ocupar a largura máxima em telas menores */
 @media screen and (max-width: 640px) {
   main, .container {
-    height: 100%; /* Garante que o contêiner pai ocupe a altura total */
+    width: 100vw; /* Ocupa toda a largura */
     margin: 0;
     padding: 0;
   }
 
   #artilharia {
+    width: 100vw !important; /* Ocupa toda a largura do viewport */
+    padding: 0 !important; /* Remove padding para maximizar largura */
+    margin: 0 !important;
     display: flex;
     flex-direction: column;
-    width: 100vw; /* Ocupa toda a largura do viewport */
-    height: 100vh; /* Ocupa toda a altura do viewport */
-    margin: 0;
-    padding: 0;
-    overflow: hidden; /* Evita barras de rolagem externas */
+    overflow-x: hidden; /* Evita rolagem externa */
+  }
+
+  #artilharia .tab-content {
+    padding: 0 !important; /* Remove padding do tab-content */
+    width: 100vw !important;
+    max-width: 100vw !important;
   }
 
   #artilharia .table-container {
     width: 100vw !important; /* Ocupa toda a largura do viewport */
-    height: 100%; /* Usa toda a altura disponível */
-    overflow-x: auto; /* Rolagem horizontal */
-    overflow-y: auto; /* Rolagem vertical */
-    display: block;
+    min-width: 100vw !important;
+    max-width: 100vw !important;
+    overflow-x: auto; /* Rolagem horizontal para colunas largas */
     margin: 0 !important;
     padding: 0 !important;
+    display: block;
   }
 
   #artilhariaTable {
     width: 100vw !important; /* Ocupa toda a largura do viewport */
-    height: 100%; /* Usa toda a altura disponível */
-    display: table;
-    table-layout: fixed; /* Substitui table-layout: auto para melhor controle */
-    overflow-x: auto;
-    overflow-y: auto;
+    min-width: 100vw !important;
+    max-width: 100vw !important;
+    table-layout: auto !important; /* Ajusta colunas dinamicamente */
     margin: 0 !important;
+    display: table;
+    overflow-x: auto;
   }
 
   #artilhariaTable thead, #artilhariaTable tbody {
@@ -288,17 +295,17 @@ th.sort-desc::after {
   }
 
   #artilhariaTable th, #artilhariaTable td {
-    padding: 2px 4px !important; /* Mantém padding reduzido para telas menores */
-    font-size: 12px !important; /* Reduz fonte para melhor ajuste */
-    min-width: 60px; /* Evita colunas muito estreitas */
+    padding: 2px 4px !important;
+    font-size: 12px !important;
+    min-width: 80px !important; /* Aumenta min-width para melhor legibilidade */
     text-align: center;
     white-space: nowrap;
   }
 
   #artilhariaTable thead {
-    position: sticky; /* Fixa o cabeçalho */
+    position: sticky;
     top: 0;
-    background-color: #2563eb; /* Mantém a cor do th */
+    background-color: #2563eb; /* Mantém cor do th */
     z-index: 10;
   }
 
@@ -309,6 +316,7 @@ th.sort-desc::after {
     position: sticky;
     top: 0;
     z-index: 20; /* Acima do thead */
+    width: 100vw;
   }
 }
 
