@@ -519,7 +519,7 @@ function displayEstatisticas() {
                             const y = bar.y - 10;
                             ctx.save();
                             ctx.textAlign = 'center';
-                            ctx.font = '9px Arial';
+                            ctx.font = '8px Arial';
                             ctx.fillStyle = '#000';
                             ctx.fillText(value, x, y);
                             ctx.restore();
@@ -564,7 +564,7 @@ function displayEstatisticas() {
                             const y = bar.y - 10;
                             ctx.save();
                             ctx.textAlign = 'center';
-                            ctx.font = '9px Arial';
+                            ctx.font = '9px';
                             ctx.fillStyle = '#000';
                             ctx.fillText(value, x, y);
                             ctx.restore();
