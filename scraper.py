@@ -1,4 +1,3 @@
-```python
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -229,4 +228,3 @@ for index, row in df_artilharia_final.iterrows():
         print(f"Linha de artilharia {row_key} gravada com sucesso")
     except Exception as e:
         print(f"Erro ao gravar linha de artilharia {row_key}: {str(e)}")
-```
