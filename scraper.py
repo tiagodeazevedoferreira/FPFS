@@ -1,4 +1,3 @@
-
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -12,6 +11,11 @@ import firebase_admin
 from firebase_admin import credentials, db
 from concurrent.futures import ThreadPoolExecutor
 import logging
+import os
+
+# Configurar cache do webdriver_manager
+os.environ['WDM_LOCAL'] = '1'
+os.environ['WDM_CACHE_PATH'] = os.path.expanduser('~/.wdm')
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -22,7 +26,17 @@ def create_driver():
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
-    return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    for attempt in range(3):
+        try:
+            return webdriver.Chrome(
+                service=Service(ChromeDriverManager().install()),
+                options=options
+            )
+        except Exception as e:
+            logging.error(f"Tentativa {attempt+1} falhou: {str(e)}")
+            time.sleep(2)
+    logging.error("Falha ao criar driver após 3 tentativas")
+    raise Exception("Não foi possível inicializar o ChromeDriver")
 
 # Lista de categorias e séries com IDs de evento (substituir pelos IDs reais)
 eventos = [
@@ -126,7 +140,6 @@ def process_event(evento):
         data_artilharia = extract_table(driver, url_artilharia, 'table', sub, serie, 'artilharia')
         df_artilharia = pd.DataFrame(data_artilharia)
         if not df_artilharia.empty:
-            # Ajustar colunas dinamicamente
             if len(df_artilharia.columns) >= 3:
                 df_artilharia = df_artilharia.iloc[:, :3].copy()
                 df_artilharia.columns = ["Jogador", "Clube", "Gols"]
