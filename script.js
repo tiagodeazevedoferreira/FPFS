@@ -320,7 +320,7 @@ function displayClassification() {
 
 function filterDataSheet1(data, filters) {
     console.log('Aplicando filtros para placar:', filters);
-    const today = new Date('2025-06-13');
+    const today = new Date();
     today.setHours(0, 0, 0, 0);
     let filteredRows = data.slice(1).filter((row, index) => {
         if (!row || row.length < 18) {
