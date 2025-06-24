@@ -12,6 +12,7 @@ let golsTomadosChart = null; // Referência ao gráfico de gols tomados
 let golsPorTimeChart2 = null; // Referência ao gráfico de Gols Feitos (Estatísticas 2)
 let golsTomadosChart2 = null; // Referência ao gráfico de Gols Tomados (Estatísticas 2)
 let timesApelidos = {}; // Mapa de times/clubes para apelidos
+let sortConfigEstatisticas = { mode: 'gols' }; // Modo de ordenação: 'gols' ou 'classificacao'
 
 function toTitleCase(str) {
     if (!str || typeof str !== 'string') return '';
@@ -483,18 +484,30 @@ function displayEstatisticas() {
         const posicao = row[1].replace('º', ''); // Remove o º se presente
         posicaoMap[normalizeString(row[2])] = posicao;
     });
-    const sortedTeamsGols = Object.entries(golsPorTime).sort((a, b) => b[1] - a[1]);
+    let sortedTeams = [];
+    if (sortConfigEstatisticas.mode === 'gols') {
+        sortedTeams = Object.entries(golsPorTime).sort((a, b) => b[1] - a[1]);
+    } else if (sortConfigEstatisticas.mode === 'classificacao') {
+        sortedTeams = Object.entries(golsPorTime).sort((a, b) => {
+            const posA = parseInt(posicaoMap[normalizeString(a[0])] || '999');
+            const posB = parseInt(posicaoMap[normalizeString(b[0])] || '999');
+            return posA - posB;
+        });
+    }
     // Modificar labels para incluir posição
-    const labelsGols = sortedTeamsGols.map(([team]) => {
+    const labelsGols = sortedTeams.map(([team]) => {
         const posicao = posicaoMap[normalizeString(team)] || 'N/A';
         return `${team} (${posicao}º)`;
     });
-    const dataGols = sortedTeamsGols.map(([_, gols]) => gols);
+    const dataGols = sortedTeams.map(([_, gols]) => gols);
     const labelsTomados = labelsGols; // Para consistência, usar mesmas labels
     const dataTomados = labelsGols.map(team => {
         const teamName = team.split(' (')[0]; // Extrair nome do time
         return golsTomados[teamName] || 0;
     });
+    // Atualizar estado dos botões
+    document.getElementById('sort-gols')?.classList.toggle('active-tab', sortConfigEstatisticas.mode === 'gols');
+    document.getElementById('sort-classificacao')?.classList.toggle('active-tab', sortConfigEstatisticas.mode === 'classificacao');
     if (golsPorTimeChart) golsPorTimeChart.destroy();
     if (golsTomadosChart) golsTomadosChart.destroy();
     golsPorTimeChart = new Chart(canvasGolsPorTime, {
@@ -592,7 +605,6 @@ function displayEstatisticas() {
     }
 }
 
-
 function displayPlacar() {
     const filters = {
         dataInicio: document.getElementById('dataInicio-placar')?.value || '',
@@ -648,7 +660,6 @@ function showTab(tabId) {
     else if (tabId === 'placar') displayPlacar();
     else if (tabId === 'artilharia') displayArtilharia();
     else if (tabId === 'estatisticas') displayEstatisticas();
-
 }
 
 async function init() {
@@ -679,6 +690,15 @@ async function init() {
     document.getElementById('limparFiltros-artilharia').addEventListener('click', () => clearFilters('artilharia'));
     document.getElementById('aplicarFiltros-estatisticas').addEventListener('click', displayEstatisticas);
     document.getElementById('limparFiltros-estatisticas').addEventListener('click', () => clearFilters('estatisticas'));
+    // Adicionar event listeners para os botões de ordenação
+    document.getElementById('sort-gols').addEventListener('click', () => {
+        sortConfigEstatisticas.mode = 'gols';
+        displayEstatisticas();
+    });
+    document.getElementById('sort-classificacao').addEventListener('click', () => {
+        sortConfigEstatisticas.mode = 'classificacao';
+        displayEstatisticas();
+    });
     if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
         try {
             await navigator.serviceWorker.register('sw.js');
