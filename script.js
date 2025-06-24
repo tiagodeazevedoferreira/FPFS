@@ -14,6 +14,80 @@ let golsTomadosChart2 = null; // Referência ao gráfico de Gols Tomados (Estat�
 let timesApelidos = {}; // Mapa de times/clubes para apelidos
 let sortConfigEstatisticas = { mode: 'gols' }; // Modo de ordenação: 'gols' ou 'classificacao'
 
+// Função auxiliar para calcular regressão polinomial de grau 2
+function calculatePolynomialRegression(data, degree = 2) {
+    if (data.length < 2) return Array(data.length).fill(0);
+    
+    const x = data.map((_, i) => i); // Índices como valores x
+    const y = data; // Valores de gols como y
+    const n = x.length;
+
+    // Montar matriz para regressão polinomial
+    const X = x.map(xi => Array(degree + 1).fill().map((_, j) => Math.pow(xi, j)));
+    const Y = y.map(yi => [yi]);
+
+    // Função para multiplicação de matrizes
+    function multiplyMatrix(A, B) {
+        const result = Array(A.length).fill().map(() => Array(B[0].length).fill(0));
+        for (let i = 0; i < A.length; i++) {
+            for (let j = 0; j < B[0].length; j++) {
+                for (let k = 0; k < A[0].length; k++) {
+                    result[i][j] += A[i][k] * B[k][j];
+                }
+            }
+        }
+        return result;
+    }
+
+    // Função para transpor matriz
+    function transposeMatrix(A) {
+        return A[0].map((_, colIndex) => A.map(row => row[colIndex]));
+    }
+
+    // Função para calcular inversa de matriz 3x3 (para grau 2)
+    function inverseMatrix3x3(A) {
+        const det = A[0][0] * (A[1][1] * A[2][2] - A[1][2] * A[2][1]) -
+                    A[0][1] * (A[1][0] * A[2][2] - A[1][2] * A[2][0]) +
+                    A[0][2] * (A[1][0] * A[2][1] - A[1][1] * A[2][0]);
+        if (Math.abs(det) < 1e-10) return null; // Matriz singular
+        const invDet = 1 / det;
+        return [
+            [
+                invDet * (A[1][1] * A[2][2] - A[1][2] * A[2][1]),
+                invDet * (A[0][2] * A[2][1] - A[0][1] * A[2][2]),
+                invDet * (A[0][1] * A[1][2] - A[0][2] * A[1][1])
+            ],
+            [
+                invDet * (A[1][2] * A[2][0] - A[1][0] * A[2][2]),
+                invDet * (A[0][0] * A[2][2] - A[0][2] * A[2][0]),
+                invDet * (A[0][2] * A[1][0] - A[0][0] * A[1][2])
+            ],
+            [
+                invDet * (A[1][0] * A[2][1] - A[1][1] * A[2][0]),
+                invDet * (A[0][1] * A[2][0] - A[0][0] * A[2][1]),
+                invDet * (A[0][0] * A[1][1] - A[0][1] * A[1][0])
+            ]
+        ];
+    }
+
+    // Calcular coeficientes: (X^T * X)^(-1) * X^T * Y
+    const Xt = transposeMatrix(X);
+    const XtX = multiplyMatrix(Xt, X);
+    const XtX_inv = inverseMatrix3x3(XtX);
+    if (!XtX_inv) return Array(n).fill(0); // Fallback em caso de erro
+    const XtY = multiplyMatrix(Xt, Y);
+    const coefficients = multiplyMatrix(XtX_inv, XtY).flat();
+
+    // Gerar valores ajustados
+    return x.map(xi => {
+        let result = 0;
+        for (let j = 0; j <= degree; j++) {
+            result += coefficients[j] * Math.pow(xi, j);
+        }
+        return Math.max(0, result); // Evitar valores negativos
+    });
+}
+
 function toTitleCase(str) {
     if (!str || typeof str !== 'string') return '';
     return str
@@ -505,6 +579,14 @@ function displayEstatisticas() {
         const teamName = team.split(' (')[0]; // Extrair nome do time
         return golsTomados[teamName] || 0;
     });
+    // Calcular médias
+    const mediaGols = dataGols.length > 0 ? dataGols.reduce((sum, val) => sum + val, 0) / dataGols.length : 0;
+    const mediaTomados = dataTomados.length > 0 ? dataTomados.reduce((sum, val) => sum + val, 0) / dataTomados.length : 0;
+    const mediaGolsData = dataGols.length > 0 ? Array(dataGols.length).fill(mediaGols) : [];
+    const mediaTomadosData = dataTomados.length > 0 ? Array(dataTomados.length).fill(mediaTomados) : [];
+    // Calcular curvas de tendência
+    const tendenciaGols = calculatePolynomialRegression(dataGols, 2);
+    const tendenciaTomados = calculatePolynomialRegression(dataTomados, 2);
     // Atualizar estado dos botões
     document.getElementById('sort-gols')?.classList.toggle('active-tab', sortConfigEstatisticas.mode === 'gols');
     document.getElementById('sort-classificacao')?.classList.toggle('active-tab', sortConfigEstatisticas.mode === 'classificacao');
@@ -514,13 +596,35 @@ function displayEstatisticas() {
         type: 'bar',
         data: {
             labels: labelsGols,
-            datasets: [{
-                label: 'Gols Feitos',
-                data: dataGols,
-                backgroundColor: '#3b82f6',
-                borderColor: '#1d4ed8',
-                borderWidth: 1
-            }]
+            datasets: [
+                {
+                    label: 'Gols Feitos',
+                    data: dataGols,
+                    backgroundColor: '#3b82f6',
+                    borderColor: '#1d4ed8',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Média',
+                    data: mediaGolsData,
+                    type: 'line',
+                    borderColor: '#15803d',
+                    borderWidth: 2,
+                    fill: false,
+                    pointRadius: 0,
+                    borderDash: [5, 5]
+                },
+                {
+                    label: 'Tendência',
+                    data: tendenciaGols,
+                    type: 'line',
+                    borderColor: '#6b21a8',
+                    borderWidth: 2,
+                    fill: false,
+                    pointRadius: 0,
+                    tension: 0.4
+                }
+            ]
         },
         options: {
             responsive: true,
@@ -530,13 +634,14 @@ function displayEstatisticas() {
                 y: { beginAtZero: true, title: { display: false }, ticks: { stepSize: 1, font: { size: 8 } } },
                 x: { title: { display: false }, ticks: { rotation: 90, autoSkip: false, font: { size: 8 }, padding: 5, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
             },
-            plugins: { legend: { display: false }, title: { display: false, text: 'Gols Feitos' } }
+            plugins: { legend: { display: true, labels: { font: { size: 8 } } }, title: { display: false, text: 'Gols Feitos' } }
         },
         plugins: [{
             id: 'customDatalabels',
             afterDraw: (chart) => {
                 const ctx = chart.ctx;
                 chart.data.datasets.forEach((dataset, datasetIndex) => {
+                    if (dataset.type !== 'bar') return; // Aplicar datalabels apenas às barras
                     const meta = chart.getDatasetMeta(datasetIndex);
                     meta.data.forEach((bar, index) => {
                         const value = dataset.data[index];
@@ -559,13 +664,35 @@ function displayEstatisticas() {
         type: 'bar',
         data: {
             labels: labelsTomados,
-            datasets: [{
-                label: 'Gols Tomados',
-                data: dataTomados,
-                backgroundColor: '#ef4444',
-                borderColor: '#b91c1c',
-                borderWidth: 1
-            }]
+            datasets: [
+                {
+                    label: 'Gols Tomados',
+                    data: dataTomados,
+                    backgroundColor: '#ef4444',
+                    borderColor: '#b91c1c',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Média',
+                    data: mediaTomadosData,
+                    type: 'line',
+                    borderColor: '#15803d',
+                    borderWidth: 2,
+                    fill: false,
+                    pointRadius: 0,
+                    borderDash: [5, 5]
+                },
+                {
+                    label: 'Tendência',
+                    data: tendenciaTomados,
+                    type: 'line',
+                    borderColor: '#6b21a8',
+                    borderWidth: 2,
+                    fill: false,
+                    pointRadius: 0,
+                    tension: 0.4
+                }
+            ]
         },
         options: {
             responsive: true,
@@ -575,13 +702,14 @@ function displayEstatisticas() {
                 y: { beginAtZero: true, title: { display: false }, ticks: { stepSize: 1, font: { size: 8 } } },
                 x: { title: { display: false }, ticks: { rotation: 90, autoSkip: false, font: { size: 8 }, padding: 5, maxRotation: 90, minRotation: 90 }, grid: { display: false } }
             },
-            plugins: { legend: { display: false }, title: { display: false, text: 'Gols Tomados' } }
+            plugins: { legend: { display: true, labels: { font: { size: 8 } } }, title: { display: false, text: 'Gols Tomados' } }
         },
         plugins: [{
             id: 'customDatalabels',
             afterDraw: (chart) => {
                 const ctx = chart.ctx;
                 chart.data.datasets.forEach((dataset, datasetIndex) => {
+                    if (dataset.type !== 'bar') return; // Aplicar datalabels apenas às barras
                     const meta = chart.getDatasetMeta(datasetIndex);
                     meta.data.forEach((bar, index) => {
                         const value = dataset.data[index];
