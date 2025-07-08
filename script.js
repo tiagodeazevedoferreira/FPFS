@@ -833,11 +833,11 @@ function displayEstatisticas2() {
             scales: {
                 y: {
                     beginAtZero: true,
-                    title: { display: true, text: 'Quantidade de Gols', font: { size: 14, weight: 'bold' } },
+                    title: { display: false, text: 'Quantidade de Gols', font: { size: 14, weight: 'bold' } },
                     ticks: { stepSize: 1, font: { size: 10 } }
                 },
                 x: {
-                    title: { display: true, text: 'Times', font: { size: 14, weight: 'bold' } },
+                    title: { display: false, text: 'Times', font: { size: 14, weight: 'bold' } },
                     ticks: { rotation: 90, autoSkip: false, font: { size: 10 }, padding: 5, maxRotation: 90, minRotation: 90 },
                     grid: { display: false }
                 }
