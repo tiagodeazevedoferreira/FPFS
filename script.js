@@ -554,8 +554,8 @@ function displayEstatisticas() {
                     data: dataGols,
                     backgroundColor: 'rgba(59, 130, 246, 0.8)', // #3b82f6 com transparência
                     borderColor: '#1d4ed8',
-                    borderWidth: 2,
-                    barThickness: 20,
+                    borderWidth: 1,
+                    barThickness: 10,
                     order: 2
                 },
                 {
@@ -563,8 +563,8 @@ function displayEstatisticas() {
                     data: dataTomados,
                     backgroundColor: 'rgba(100, 100, 100, 0.9)', // 'rgba(239, 68, 68, 1)', // #ef4444 com transparência - parametro anteior
                     borderColor: '#6B7280', //'#b91c1c' cor anterior
-                    borderWidth: 2,
-                    barThickness: 6,
+                    borderWidth: 1,
+                    barThickness: 5,
                     order: 1
                 }
             ]
