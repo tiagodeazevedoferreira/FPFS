@@ -576,11 +576,11 @@ function displayEstatisticas() {
             scales: {
                 y: {
                     beginAtZero: true,
-                    title: { display: true, text: 'Quantidade de Gols', font: { size: 12 } },
+                    title: { display: false, text: 'Quantidade de Gols', font: { size: 12 } },
                     ticks: { stepSize: 1, font: { size: 8 } }
                 },
                 x: {
-                    title: { display: true, text: 'Times', font: { size: 12 } },
+                    title: { display: false, text: 'Times', font: { size: 12 } },
                     ticks: { rotation: 90, autoSkip: false, font: { size: 8 }, padding: 5, maxRotation: 90, minRotation: 90 },
                     grid: { display: false }
                 }
