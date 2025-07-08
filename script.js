@@ -580,7 +580,7 @@ function displayEstatisticas() {
                 y: {
                     beginAtZero: true,
                     title: {
-                        display: true,
+                        display: false,
                         text: 'Quantidade de Gols',
                         font: { size: window.innerWidth <= 768 ? 10 : 12 }
                     },
@@ -588,7 +588,7 @@ function displayEstatisticas() {
                 },
                 x: {
                     title: {
-                        display: true,
+                        display: false,
                         text: 'Times',
                         font: { size: window.innerWidth <= 768 ? 10 : 12 }
                     },
