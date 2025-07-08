@@ -1,3 +1,4 @@
+
 console.log('Script.js iniciado');
 
 const FIREBASE_URL = 'https://fpfs2025sub9-default-rtdb.firebaseio.com/';
@@ -524,13 +525,13 @@ function displayEstatisticas() {
         sortedTeams = Object.entries(golsPorTime).sort((a, b) => {
             const golsA = parseInt(a[1]) || 0;
             const golsB = parseInt(b[1]) || 0;
-            return golsB - golsA; // Ordem decrescente para gols
+            return golsB - golsA;
         });
     } else if (sortConfigEstatisticas.mode === 'classificacao') {
         sortedTeams = Object.entries(golsPorTime).sort((a, b) => {
             const posA = parseInt(posicaoMap[normalizeString(a[0])] || '999');
             const posB = parseInt(posicaoMap[normalizeString(b[0])] || '999');
-            return posA - posB; // Ordem crescente para classificação
+            return posA - posB;
         });
     }
     console.log('Times ordenados:', sortedTeams);
@@ -552,7 +553,7 @@ function displayEstatisticas() {
                 {
                     label: 'Gols Feitos',
                     data: dataGols,
-                    backgroundColor: 'rgba(59, 130, 246, 0.8)', // #3b82f6 com transparência
+                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
                     borderColor: '#1d4ed8',
                     borderWidth: 1,
                     barThickness: 10,
@@ -561,8 +562,8 @@ function displayEstatisticas() {
                 {
                     label: 'Gols Tomados',
                     data: dataTomados,
-                    backgroundColor: 'rgba(100, 100, 100, 0.9)', // 'rgba(239, 68, 68, 1)', // #ef4444 com transparência - parametro anteior
-                    borderColor: '#6B7280', //'#b91c1c' cor anterior
+                    backgroundColor: 'rgba(100, 100, 100, 0.9)',
+                    borderColor: '#6B7280',
                     borderWidth: 1,
                     barThickness: 5,
                     order: 1
@@ -571,23 +572,51 @@ function displayEstatisticas() {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
-            layout: { padding: { bottom: 0, right: 0, left: 0, top: 25 } },
+            maintainAspectRatio: false,
+            layout: {
+                padding: { bottom: 20, right: 10, left: 10, top: 20 }
+            },
             scales: {
                 y: {
                     beginAtZero: true,
-                    title: { display: false, text: 'Quantidade de Gols', font: { size: 12 } },
-                    ticks: { stepSize: 1, font: { size: 8 } }
+                    title: {
+                        display: true,
+                        text: 'Quantidade de Gols',
+                        font: { size: window.innerWidth <= 768 ? 10 : 12 }
+                    },
+                    ticks: { stepSize: 1, font: { size: window.innerWidth <= 768 ? 6 : 8 } }
                 },
                 x: {
-                    title: { display: false, text: 'Times', font: { size: 12 } },
-                    ticks: { rotation: 90, autoSkip: false, font: { size: 8 }, padding: 5, maxRotation: 90, minRotation: 90 },
+                    title: {
+                        display: true,
+                        text: 'Times',
+                        font: { size: window.innerWidth <= 768 ? 10 : 12 }
+                    },
+                    ticks: {
+                        rotation: 90,
+                        autoSkip: false,
+                        font: { size: window.innerWidth <= 768 ? 6 : 8 },
+                        padding: 5,
+                        maxRotation: 90,
+                        minRotation: 90
+                    },
                     grid: { display: false }
                 }
             },
             plugins: {
-                legend: { display: true, position: 'top', labels: { font: { size: 8 } } },
-                tooltip: { enabled: true, mode: 'index', intersect: false, backgroundColor: 'rgba(0,0,0,0.8)', titleFont: { size: 12 }, bodyFont: { size: 10 } }
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: { font: { size: window.innerWidth <= 768 ? 8 : 10 } }
+                },
+                tooltip: {
+                    enabled: true,
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    titleFont: { size: window.innerWidth <= 768 ? 10 : 12 },
+                    bodyFont: { size: window.innerWidth <= 768 ? 8 : 10 }
+                }
             },
             barPercentage: 0.6,
             categoryPercentage: 0.6
@@ -608,7 +637,7 @@ function displayEstatisticas() {
                                 const y = bar.y - 10;
                                 ctx.save();
                                 ctx.textAlign = 'center';
-                                ctx.font = '8px Arial';
+                                ctx.font = `bold ${window.innerWidth <= 768 ? 6 : 8}px Arial`;
                                 ctx.fillStyle = '#000';
                                 ctx.fillText(value, x, y);
                                 ctx.restore();
@@ -755,13 +784,13 @@ function displayEstatisticas2() {
         sortedTeams = Object.entries(golsPorTime).sort((a, b) => {
             const golsA = parseInt(a[1]) || 0;
             const golsB = parseInt(b[1]) || 0;
-            return golsB - golsA; // Ordem decrescente para gols
+            return golsB - golsA;
         });
     } else if (sortConfigEstatisticas2.mode === 'classificacao') {
         sortedTeams = Object.entries(golsPorTime).sort((a, b) => {
             const posA = parseInt(posicaoMap[normalizeString(a[0])] || '999');
             const posB = parseInt(posicaoMap[normalizeString(b[0])] || '999');
-            return posA - posB; // Ordem crescente para classificação
+            return posA - posB;
         });
     }
     console.log('Times ordenados (Estatísticas 2):', sortedTeams);
