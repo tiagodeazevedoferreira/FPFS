@@ -116,16 +116,16 @@ td {
 }
 
 tr:nth-child(even) {
-  background-color: #d1fae5; /* Verde vibrante */
+  background-color: #d1fae5;
 }
 
 tr:hover {
-  background-color: #e0f2fe; /* Azul claro no hover */
+  background-color: #e0f2fe;
 }
 
 th {
   white-space: nowrap;
-  background-color: #2563eb; /* Rosa vibrante */
+  background-color: #2563eb;
   color: white;
 }
 
@@ -146,12 +146,28 @@ th {
 }
 
 .chart-container {
-  max-width: 600px;
+  max-width: 100%;
   margin: 1rem auto;
   padding: 1rem;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.charts-container {
+  padding: 0.5rem;
+  width: 100%;
+  min-height: 60vh;
+}
+
+.charts-container canvas {
+  width: 100% !important;
+  height: 60vh !important;
+  max-height: 600px;
+  margin: 0 !important;
 }
 
 .loading-spinner {
@@ -263,35 +279,30 @@ th.sort-desc::after {
   }
 
   .chart-container {
-    max-width: 100%;
     padding: 0.5rem;
+    margin: 0.5rem auto;
+  }
+
+  .charts-container {
+    padding: 0.25rem;
+    min-height: 70vh;
+  }
+
+  .charts-container canvas {
+    height: 70vh !important;
+    max-height: 500px;
   }
 }
 
-/* Estilização para gráficos lado a lado na aba Estatísticas 2 */
-#estatisticas2 .charts-container {
+.filter-controls {
   display: flex;
-  flex-wrap: nowrap; /* Impede quebra de linha */
-  gap: 0; /* Remove espaçamento entre os gráficos */
-  justify-content: flex-start; /* Alinha à esquerda */
-  overflow-x: auto; /* Permite rolagem horizontal */
-  padding: 0.5rem;
-  -webkit-overflow-scrolling: touch;
+  gap: 0.5rem;
+  align-items: center;
 }
 
-#estatisticas2 .chart-container {
-  flex: 0 0 auto; /* Evita expansão desnecessária */
-  min-width: 280px; /* Ajustado para gráficos menores */
-  max-width: 320px; /* Limite para consistência */
-  margin: 0; /* Remove margens */
-  padding: 0.5rem; /* Padding mínimo */
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-#estatisticas2 .chart-container canvas {
-  width: 100% !important;
-  height: 300px !important; /* Altura fixa para visibilidade */
-  margin: 0 !important;
+@media (max-width: 768px) {
+  .filter-controls {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
 }
