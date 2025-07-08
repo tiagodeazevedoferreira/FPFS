@@ -162,23 +162,23 @@ th {
 .charts-container {
   padding: 0.25rem; /* Mantido para minimizar espaço */
   width: 100%;
-  min-height: 60vh; /* Reduzido de 120vh para suportar o gráfico menor */
+  min-height: 48vh; /* Reduzido de 60vh (80% de 60vh) */
 }
 
 #estatisticas .charts-container {
-  min-height: 80vh !important; /* Reduzido de 160vh para suportar o gráfico menor */
+  min-height: 64vh !important; /* Reduzido de 80vh (80% de 80vh) */
 }
 
 .charts-container canvas {
   width: 100% !important;
-  height: 60vh !important; /* Reduzido de 120vh para suportar o gráfico menor */
-  max-height: 600px;
+  height: 48vh !important; /* Reduzido de 60vh (80% de 60vh) */
+  max-height: 480px;
   margin: 0 !important;
 }
 
 #estatisticasChart {
-  height: 96vh !important; /* Reduzido de 192vh para 50% do tamanho anterior */
-  max-height: 960px !important; /* Reduzido de 1920px */
+  height: 77vh !important; /* Reduzido de 96vh (80% de 96vh, arredondado) */
+  max-height: 768px !important; /* Reduzido de 960px (80% de 960px) */
   margin-bottom: 2rem !important; /* Mantido para evitar corte */
 }
 
@@ -303,21 +303,21 @@ th.sort-desc::after {
 
   .charts-container {
     padding: 0.125rem; /* Mantido para minimizar espaço */
-    min-height: 50vh; /* Reduzido de 100vh para suportar o gráfico menor */
+    min-height: 40vh; /* Reduzido de 50vh (80% de 50vh) */
   }
 
   #estatisticas .charts-container {
-    min-height: 60vh !important; /* Reduzido de 120vh para suportar o gráfico menor */
+    min-height: 48vh !important; /* Reduzido de 60vh (80% de 60vh) */
   }
 
   .charts-container canvas {
-    height: 50vh !important; /* Reduzido de 100vh para suportar o gráfico menor */
-    max-height: 500px;
+    height: 40vh !important; /* Reduzido de 50vh (80% de 50vh) */
+    max-height: 400px;
   }
 
   #estatisticasChart {
-    height: 80vh !important; /* Reduzido de 160vh para 50% do tamanho anterior */
-    max-height: 800px !important; /* Reduzido de 1600px */
+    height: 64vh !important; /* Reduzido de 80vh (80% de 80vh) */
+    max-height: 640px !important; /* Reduzido de 800px (80% de 800px) */
     margin-bottom: 1rem !important; /* Mantido para evitar corte */
   }
 
