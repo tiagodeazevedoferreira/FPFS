@@ -22,7 +22,7 @@ try:
     # ---------------------------
     # Extrair tabela de classificação
     # ---------------------------
-    url_classificacao = "https://eventos.admfutsal.com.br/evento/864"
+    url_classificacao = "https://eventos.admfutsal.com.br/evento/864#pills-fase-total"
     driver.get(url_classificacao)
     time.sleep(5)  # Espera inicial
 
@@ -50,7 +50,7 @@ try:
     # ---------------------------
     # Extrair tabela de jogos
     # ---------------------------
-    url_jogos = "https://eventos.admfutsal.com.br/evento/864/jogos"
+    url_jogos = "https://eventos.admfutsal.com.br/evento/864/jogos#pills-fase-34669"
     driver.get(url_jogos)
     time.sleep(5)  # Espera inicial
 
@@ -128,23 +128,12 @@ try:
     print(f"Dados de jogos formatados: {len(formatted_jogos)} linhas.")
 
     # ---------------------------
-    # Extrair tabela de artilharia (aba Geral / pills-fase-total)
+    # Extrair tabela de artilharia (link já OK)
     # ---------------------------
     url_artilharia = "https://eventos.admfutsal.com.br/evento/864/artilharia"
     driver.get(url_artilharia)
     time.sleep(5)  # Espera inicial
 
-    # Clicar na aba "Geral" (pills-fase-total-tab), para garantir que a aba correta esteja ativa
-    try:
-        aba_geral = WebDriverWait(driver, 20).until(
-            EC.element_to_be_clickable((By.ID, "pills-fase-total-tab"))
-        )
-        aba_geral.click()
-        time.sleep(3)  # pequena espera para o conteúdo da aba carregar
-    except Exception as e:
-        print(f"Não foi possível clicar na aba 'Geral' (pills-fase-total-tab): {e}")
-
-    # Agora localizar a tabela de artilharia
     table_artilharia = WebDriverWait(driver, 20).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, 'table'))
     )
