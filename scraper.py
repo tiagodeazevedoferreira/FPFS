@@ -100,7 +100,7 @@ try:
     print(f"Dados de jogos formatados: {len(formatted_jogos)} linhas.")
 
     # Extrair tabela de artilharia
-    url_artilharia = "https://eventos.admfutsal.com.br/evento/864/artilharia"
+    url_artilharia = "https://eventos.admfutsal.com.br/evento/864/artilharia#pills-fase-total"
     driver.get(url_artilharia)
     time.sleep(5)  # Espera inicial
     table_artilharia = WebDriverWait(driver, 20).until(
