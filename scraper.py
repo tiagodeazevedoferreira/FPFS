@@ -19,19 +19,25 @@ options.add_argument('--disable-dev-shm-usage')
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 try:
+    # ---------------------------
     # Extrair tabela de classificação
+    # ---------------------------
     url_classificacao = "https://eventos.admfutsal.com.br/evento/864"
     driver.get(url_classificacao)
     time.sleep(5)  # Espera inicial
+
     table_classificacao = WebDriverWait(driver, 20).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, '.classification_table'))
     )
+
     rows_classificacao = table_classificacao.find_elements(By.TAG_NAME, 'tr')
     data_classificacao = []
+
     for row in rows_classificacao:
         cols = row.find_elements(By.TAG_NAME, 'td')
         cols = [col.text for col in cols]
         data_classificacao.append(cols)
+
     df_classificacao = pd.DataFrame(data_classificacao)
     print(f"Dados de classificação extraídos: {len(data_classificacao)} linhas.")
 
@@ -41,15 +47,20 @@ try:
     df_classificacao = df_classificacao.sort_values(by='Index', ascending=True)
     print(f"Classificação ordenada por Index: {df_classificacao['Index'].tolist()}")
 
+    # ---------------------------
     # Extrair tabela de jogos
+    # ---------------------------
     url_jogos = "https://eventos.admfutsal.com.br/evento/864/jogos"
     driver.get(url_jogos)
     time.sleep(5)  # Espera inicial
+
     table_jogos = WebDriverWait(driver, 20).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, 'table'))
     )
+
     rows_jogos = table_jogos.find_elements(By.TAG_NAME, 'tr')
     data_jogos = []
+
     for row in rows_jogos:
         cols = row.find_elements(By.TAG_NAME, 'td')
         cols = [col.text.replace("Ver Súmula", "").strip() for col in cols]
@@ -57,13 +68,17 @@ try:
 
     # Processar a última coluna para quebrar em Mandante, Placar 1, X, Placar 2, Visitante
     formatted_jogos = []
+
     for row in data_jogos:
         if len(row) < 4:  # Garantir que haja pelo menos Data, Horário, Ginásio e a última coluna
             continue
+
         data = row[0] if len(row) > 0 else ""
+
         # Corrigir o formato da data para DD/MM/YYYY
         if data and len(data.split('/')) == 2:  # Se a data está no formato DD/MM
             data = f"{data}/2025"  # Adiciona o ano 2025
+
         horario = row[1] if len(row) > 1 else ""
         ginasio = row[2] if len(row) > 2 else ""
         ultima_coluna = row[-1] if row else ""  # Última coluna com o jogo e placar
@@ -77,48 +92,80 @@ try:
         # Procurar o placar (ex.: "1 x 2") como delimitador
         partes = ultima_coluna.split()
         placar_index = -1
+
         for i, parte in enumerate(partes):
-            if parte.lower() == "x" and i > 0 and i < len(partes)-1 and partes[i-1].isdigit() and partes[i+1].isdigit():
+            if (
+                parte.lower() == "x"
+                and i > 0
+                and i < len(partes) - 1
+                and partes[i - 1].isdigit()
+                and partes[i + 1].isdigit()
+            ):
                 placar_index = i
-                placar1 = partes[i-1]
-                placar2 = partes[i+1]
+                placar1 = partes[i - 1]
+                placar2 = partes[i + 1]
                 break
 
         if placar_index != -1:
             # Tudo antes do placar1 é o Mandante
-            mandante = " ".join(partes[:placar_index-1]).strip()
+            mandante = " ".join(partes[:placar_index - 1]).strip()
             # Tudo depois do placar2 é o Visitante
-            visitante = " ".join(partes[placar_index+2:]).strip()
+            visitante = " ".join(partes[placar_index + 2:]).strip()
 
-        formatted_jogos.append([data, horario, ginasio, mandante, placar1, "X", placar2, visitante])
+        formatted_jogos.append(
+            [data, horario, ginasio, mandante, placar1, "X", placar2, visitante]
+        )
 
     # Criar DataFrame com índice explícito
-    df_jogos = pd.DataFrame(formatted_jogos, columns=["Data", "Horário", "Ginásio", "Mandante", "Placar 1", "X", "Placar 2", "Visitante"])
+    df_jogos = pd.DataFrame(
+        formatted_jogos,
+        columns=["Data", "Horário", "Ginásio", "Mandante", "Placar 1", "X", "Placar 2", "Visitante"]
+    )
     df_jogos['Index'] = df_jogos.index  # Adicionar o índice como uma coluna
+
     # Ordenar pelo índice (ordem crescente)
     df_jogos = df_jogos.sort_values(by='Index', ascending=True)
     print(f"Dados de jogos formatados: {len(formatted_jogos)} linhas.")
 
-    # Extrair tabela de artilharia
-    url_artilharia = "https://eventos.admfutsal.com.br/evento/864/artilharia#pills-fase-total"
+    # ---------------------------
+    # Extrair tabela de artilharia (aba Geral / pills-fase-total)
+    # ---------------------------
+    url_artilharia = "https://eventos.admfutsal.com.br/evento/864/artilharia"
     driver.get(url_artilharia)
     time.sleep(5)  # Espera inicial
+
+    # Clicar na aba "Geral" (pills-fase-total-tab), para garantir que a aba correta esteja ativa
+    try:
+        aba_geral = WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((By.ID, "pills-fase-total-tab"))
+        )
+        aba_geral.click()
+        time.sleep(3)  # pequena espera para o conteúdo da aba carregar
+    except Exception as e:
+        print(f"Não foi possível clicar na aba 'Geral' (pills-fase-total-tab): {e}")
+
+    # Agora localizar a tabela de artilharia
     table_artilharia = WebDriverWait(driver, 20).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, 'table'))
     )
+
     rows_artilharia = table_artilharia.find_elements(By.TAG_NAME, 'tr')
     data_artilharia = []
+
     for row in rows_artilharia:
         cols = row.find_elements(By.TAG_NAME, 'td')
         cols = [col.text.strip() for col in cols]
         data_artilharia.append(cols)
+
     df_artilharia = pd.DataFrame(data_artilharia)
     print(f"Dados de artilharia extraídos: {len(data_artilharia)} linhas.")
 
 except Exception as e:
     print(f"Erro ao extrair dados: {str(e)}")
     df_classificacao = pd.DataFrame()
-    df_jogos = pd.DataFrame(columns=["Data", "Horário", "Ginásio", "Mandante", "Placar 1", "X", "Placar 2", "Visitante", "Index"])
+    df_jogos = pd.DataFrame(
+        columns=["Data", "Horário", "Ginásio", "Mandante", "Placar 1", "X", "Placar 2", "Visitante", "Index"]
+    )
     df_artilharia = pd.DataFrame()
 
 finally:
@@ -130,7 +177,9 @@ if df_classificacao.empty and df_jogos.empty and df_artilharia.empty:
     print("Erro: Nenhum dado foi extraído.")
     exit(1)
 
+# ---------------------------
 # Inicializar o Firebase com o SDK
+# ---------------------------
 try:
     cred = credentials.Certificate('credentials.json')
     firebase_admin.initialize_app(cred, {
@@ -149,7 +198,9 @@ artilharia_ref = db.reference('artilharia')
 # Obter timestamp atual para organizar os dados
 timestamp = time.strftime('%Y_')
 
+# ---------------------------
 # Enviar dados de classificação para o Firebase
+# ---------------------------
 for index, row in df_classificacao.iterrows():
     row_key = f"{timestamp}{int(row['Index'])}"
     try:
@@ -159,7 +210,9 @@ for index, row in df_classificacao.iterrows():
     except Exception as e:
         print(f"Erro ao gravar linha de classificação {row_key}: {str(e)}")
 
+# ---------------------------
 # Enviar dados de jogos para o Firebase, mantendo a ordem do índice
+# ---------------------------
 for index, row in df_jogos.iterrows():
     row_key = f"{timestamp}{int(row['Index'])}"
     try:
@@ -169,7 +222,9 @@ for index, row in df_jogos.iterrows():
     except Exception as e:
         print(f"Erro ao gravar linha de jogos {row_key}: {str(e)}")
 
+# ---------------------------
 # Enviar dados de artilharia para o Firebase
+# ---------------------------
 for index, row in df_artilharia.iterrows():
     row_key = f"{timestamp}{index}"
     try:
