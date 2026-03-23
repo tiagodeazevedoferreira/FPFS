@@ -38,7 +38,6 @@ except Exception as e:
 # Inicializar Firebase (uma única vez)
 # =============================================
 try:
-    # No GitHub Actions, o arquivo credentials.json já foi criado pelo passo anterior
     cred_path = 'credentials.json'
     if not os.path.exists(cred_path):
         raise FileNotFoundError("credentials.json não encontrado")
@@ -53,7 +52,7 @@ except Exception as e:
     driver.quit()
     exit(1)
 
-# Referências aos nós
+# Referências aos nós (sem prefixos)
 classificacao_ref = db.reference('classificacao')
 jogos_ref = db.reference('jogos')
 artilharia_ref = db.reference('artilharia')
@@ -68,8 +67,6 @@ def scrape_and_save(event_key, event_data):
     ano       = event_data['Ano']
     
     print(f"\nProcessando: {categoria} {divisao} {ano} ({url_base.split('/')[-1]})")
-
-    prefix = f"{ano}_{categoria.replace(' ','').replace('-','')}_{divisao}"
 
     try:
         # =============================================
@@ -92,48 +89,50 @@ def scrape_and_save(event_key, event_data):
                 print("  → Usando fallback: primeira tabela da página")
             except:
                 print("  → Nenhuma tabela de classificação encontrada")
-                return
 
-        rows = table.find_elements(By.TAG_NAME, 'tr')
-        data = []
+        if table:
+            rows = table.find_elements(By.TAG_NAME, 'tr')
+            data = []
 
-        for row in rows:
-            # Aceita tanto <th> quanto <td>
-            cells = row.find_elements(By.TAG_NAME, 'th') or row.find_elements(By.TAG_NAME, 'td')
-            row_text = [cell.text.strip() for cell in cells if cell.text.strip()]
-            if row_text:
-                data.append(row_text)
+            for row in rows:
+                cells = row.find_elements(By.TAG_NAME, 'th') or row.find_elements(By.TAG_NAME, 'td')
+                row_text = [cell.text.strip() for cell in cells if cell.text.strip()]
+                if row_text:
+                    data.append(row_text)
 
-        if not data:
-            print("  → Nenhuma linha com conteúdo na classificação")
-        else:
-            # Tenta identificar o cabeçalho (linha com mais colunas ou primeira linha longa)
-            header = None
-            data_rows = []
+            if data:
+                # Identificar cabeçalho
+                header = None
+                data_rows = []
+                max_cols = max(len(r) for r in data) if data else 0
 
-            max_cols = max(len(r) for r in data)
-            for row in data:
-                if len(row) >= max_cols - 2:  # tolerância pequena
-                    if header is None:
-                        header = row
-                else:
-                    if len(row) == len(header or []):
-                        data_rows.append(row)
+                for row in data:
+                    if len(row) >= max_cols - 2:
+                        if header is None:
+                            header = row
+                    else:
+                        if len(row) == len(header or []):
+                            data_rows.append(row)
 
-            if header is None or len(header) == 0:
-                header = [f"Col_{i+1}" for i in range(max_cols)]
-                data_rows = data
+                if header is None or len(header) == 0:
+                    header = [f"Col_{i+1}" for i in range(max_cols)]
+                    data_rows = data
 
-            try:
-                df = pd.DataFrame(data_rows, columns=header[:len(data_rows[0]) if data_rows else len(header)])
-                df['Index'] = range(len(df))
-                classificacao_ref.child(prefix).set(df.to_dict(orient='records'))
-                print(f"  → Classificação salva ({len(df)} linhas, {len(header)} colunas)")
-            except Exception as e:
-                print(f"  → Falha ao criar DataFrame: {e}")
-                # Fallback: salva dados crus
-                classificacao_ref.child(f"{prefix}_raw").set(data)
-                print("  → Dados crus salvos como fallback (_raw)")
+                try:
+                    df = pd.DataFrame(data_rows, columns=header[:len(data_rows[0]) if data_rows else len(header)])
+                    df['Index'] = range(len(df))
+
+                    # Salvar no formato antigo: chaves numéricas diretas
+                    for idx, row in df.to_dict(orient='records').items():
+                        classificacao_ref.child(str(idx)).set(row)
+
+                    print(f"  → Classificação salva ({len(df)} linhas)")
+                except Exception as e:
+                    print(f"  → Falha ao criar/salvar DataFrame classificação: {e}")
+                    classificacao_ref.set(data)  # fallback raw
+                    print("  → Dados crus salvos como fallback")
+            else:
+                print("  → Nenhuma linha válida na classificação")
 
         # =============================================
         # 2. JOGOS
@@ -152,7 +151,6 @@ def scrape_and_save(event_key, event_data):
             cols = [c.text.strip().replace("Ver Súmula", "").strip() for c in row.find_elements(By.TAG_NAME, 'td')]
             if len(cols) >= 4:
                 data_col = cols[0]
-                # Correção de data para 2026 se estiver incompleta
                 parts = data_col.split('/')
                 if len(parts) == 2:
                     data_col = f"{data_col}/2026"
@@ -164,7 +162,9 @@ def scrape_and_save(event_key, event_data):
                 })
 
         if jogos_data:
-            jogos_ref.child(prefix).set(jogos_data)
+            # Salvar no formato antigo: chaves numéricas diretas
+            for idx, item in enumerate(jogos_data):
+                jogos_ref.child(str(idx)).set(item)
             print(f"  → Jogos salvos ({len(jogos_data)} partidas)")
         else:
             print("  → Nenhuma partida encontrada")
@@ -190,9 +190,14 @@ def scrape_and_save(event_key, event_data):
         if artilharia_data:
             header_art = artilharia_data[0] if artilharia_data else []
             data_art = artilharia_data[1:]
-            df_art = pd.DataFrame(data_art, columns=header_art[:len(data_art[0]) if data_art else len(header_art)])
-            artilharia_ref.child(prefix).set(df_art.to_dict(orient='records'))
-            print(f"  → Artilharia salva ({len(df_art)} linhas)")
+            try:
+                df_art = pd.DataFrame(data_art, columns=header_art[:len(data_art[0]) if data_art else len(header_art)])
+                for idx, row in df_art.to_dict(orient='records').items():
+                    artilharia_ref.child(str(idx)).set(row)
+                print(f"  → Artilharia salva ({len(df_art)} linhas)")
+            except Exception as e:
+                print(f"  → Falha ao salvar artilharia: {e}")
+                artilharia_ref.set(artilharia_data)  # fallback
         else:
             print("  → Nenhuma artilharia encontrada")
 
