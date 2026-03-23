@@ -1,41 +1,20 @@
 {
   "links": {
-    "link7": {
-      "Link": "https://eventos.admfutsal.com.br/evento/864",
-      "Divisao": "A1",
-      "Categoria": "Sub-9",
-      "Ano": "2025",
-      "type": "classificacao"
-    },
-    "link8": {
-      "Link": "https://eventos.admfutsal.com.br/evento/864/jogos",
-      "Divisao": "A1",
-      "Categoria": "Sub-9",
-      "Ano": "2025",
-      "type": "jogos"
-    },
-    "link9": {
-      "Link": "https://eventos.admfutsal.com.br/evento/864/artilharia",
-      "Divisao": "A1",
-      "Categoria": "Sub-9",
-      "Ano": "2025",
-      "type": "artilharia"
-    },
-    "link10": {
+    "sub10_classificacao": {
       "Link": "https://eventos.admfutsal.com.br/evento/911",
       "Divisao": "A1",
       "Categoria": "Sub-10",
       "Ano": "2026",
       "type": "classificacao"
     },
-    "link11": {
+    "sub10_jogos": {
       "Link": "https://eventos.admfutsal.com.br/evento/911/jogos",
       "Divisao": "A1",
       "Categoria": "Sub-10",
       "Ano": "2026",
       "type": "jogos"
     },
-    "link12": {
+    "sub10_artilharia": {
       "Link": "https://eventos.admfutsal.com.br/evento/911/artilharia",
       "Divisao": "A1",
       "Categoria": "Sub-10",
@@ -47,6 +26,98 @@
     {
       "Apelido": "Batebola",
       "Time": "A.D. BATEBOLA"
+    },
+    {
+      "Apelido": "Mesc",
+      "Time": "A.D. DO ABCD/MESC SÃO BERNARDO"
+    },
+    {
+      "Apelido": "Suzano",
+      "Time": "A.D. SUZANO"
+    },
+    {
+      "Apelido": "Magnus",
+      "Time": "ASF/MAGNUS"
+    },
+    {
+      "Apelido": "Bola no Pé",
+      "Time": "ASSOCIAÇÃO ESPORTIVA CENTRO DE TREINAMENTO BOLA NO PÉ"
+    },
+    {
+      "Apelido": "Portuguesa",
+      "Time": "ASSOCIAÇÃO PORTUGUESA DE DESPORTOS"
+    },
+    {
+      "Apelido": "Juventus",
+      "Time": "C.A. JUVENTUS"
+    },
+    {
+      "Apelido": "Tabuca",
+      "Time": "C.A. TABUCA JRS"
+    },
+    {
+      "Apelido": "Ypiranga",
+      "Time": "C.A. YPIRANGA"
+    },
+    {
+      "Apelido": "Camisa 10",
+      "Time": "CAMISA 10 F.C."
+    },
+    {
+      "Apelido": "Hortolândia",
+      "Time": "E.C. HORTOLANDIA"
+    },
+    {
+      "Apelido": "Audax",
+      "Time": "FAE /OSASCO/ AUDAX/PEDAGOGIA ESPORTE SOCIAL"
+    },
+    {
+      "Apelido": "Gremetal",
+      "Time": "GREMETAL"
+    },
+    {
+      "Apelido": "ADI",
+      "Time": "INDAIATUBA FUTSAL/INDACOR/LOFTS"
+    },
+    {
+      "Apelido": "Lausanne",
+      "Time": "LAUSANNE PAULISTA FC - A"
+    },
+    {
+      "Apelido": "Liga",
+      "Time": "LIGA SANCAETANENSE DE FUTEBOL DE SALÃO"
+    },
+    {
+      "Apelido": "Marvel",
+      "Time": "MARVEL"
+    },
+    {
+      "Apelido": "Elite",
+      "Time": "S.E. ELITE ITAQUERENSE"
+    },
+    {
+      "Apelido": "Santos",
+      "Time": "SANTOS FC"
+    },
+    {
+      "Apelido": "RSFC",
+      "Time": "SÃO CAETANO FUTEBOL CLUBE"
+    },
+    {
+      "Apelido": "São Paulo",
+      "Time": "SÃO PAULO FC - A"
+    },
+    {
+      "Apelido": "Palmeiras",
+      "Time": "SE PALMEIRAS"
+    },
+    {
+      "Apelido": "Corinthians",
+      "Time": "SPORT CLUB CORINTHIANS PAULISTA"
+    },
+    {
+      "Apelido": "Taubaté",
+      "Time": "TAUBATÉ FUTSAL"
     }
   ]
 }
