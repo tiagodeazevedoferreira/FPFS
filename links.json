@@ -1,0 +1,52 @@
+{
+  "links": {
+    "link7": {
+      "Link": "https://eventos.admfutsal.com.br/evento/864",
+      "Divisao": "A1",
+      "Categoria": "Sub-9",
+      "Ano": "2025",
+      "type": "classificacao"
+    },
+    "link8": {
+      "Link": "https://eventos.admfutsal.com.br/evento/864/jogos",
+      "Divisao": "A1",
+      "Categoria": "Sub-9",
+      "Ano": "2025",
+      "type": "jogos"
+    },
+    "link9": {
+      "Link": "https://eventos.admfutsal.com.br/evento/864/artilharia",
+      "Divisao": "A1",
+      "Categoria": "Sub-9",
+      "Ano": "2025",
+      "type": "artilharia"
+    },
+    "link10": {
+      "Link": "https://eventos.admfutsal.com.br/evento/911",
+      "Divisao": "A1",
+      "Categoria": "Sub-10",
+      "Ano": "2026",
+      "type": "classificacao"
+    },
+    "link11": {
+      "Link": "https://eventos.admfutsal.com.br/evento/911/jogos",
+      "Divisao": "A1",
+      "Categoria": "Sub-10",
+      "Ano": "2026",
+      "type": "jogos"
+    },
+    "link12": {
+      "Link": "https://eventos.admfutsal.com.br/evento/911/artilharia",
+      "Divisao": "A1",
+      "Categoria": "Sub-10",
+      "Ano": "2026",
+      "type": "artilharia"
+    }
+  },
+  "times_apelidos": [
+    {
+      "Apelido": "Batebola",
+      "Time": "A.D. BATEBOLA"
+    }
+  ]
+}
